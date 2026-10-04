@@ -1,4 +1,4 @@
-﻿# 点阵绘制与花本编译 MVP Implementation Plan
+# 点阵绘制与花本编译 MVP Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -54,7 +54,7 @@
 - Produces: `PatternGrid.row(y: int) -> tuple[bool, ...]`
 - Produces: `PatternGrid.to_matrix() -> tuple[tuple[bool, ...], ...]`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Test `tests/domain/test_models.py` with `unittest`:
 
@@ -92,21 +92,21 @@ class PatternGridTests(unittest.TestCase):
             PatternGrid(2, 2, [[False, False]])
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `python -m unittest tests.domain.test_models -v` with `PYTHONPATH=src`  
 Expected: import failure because `PatternGrid` does not exist.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `PatternGrid` as a small mutable domain object. Validate dimensions on construction and coordinate access. Copy must deep-copy all cells. No Qt imports in this module.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `python -m unittest tests.domain.test_models -v` with `PYTHONPATH=src`  
 Expected: 4 tests PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add pyproject.toml .gitignore src/jingwei tests
@@ -128,7 +128,7 @@ git commit -m "feat: add pattern grid domain model"
 - Produces: `WeavePlan(warp_count: int, weft_count: int, cards: tuple[Card, ...], picks: tuple[Pick, ...], report: CompileReport)`
 - Produces: `compile_pattern(grid: PatternGrid) -> WeavePlan`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Test that:
 
@@ -157,26 +157,26 @@ def test_empty_pattern_compiles_to_empty_plan_with_warning(self):
     self.assertIn("纹样为空", plan.report.warnings[0])
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `python -m unittest tests.domain.test_compiler -v` with `PYTHONPATH=src`  
 Expected: import failure because `compile_pattern` does not exist.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 For each row, build `lifted_warp` as the tuple of columns whose value is `True`. Use the tuple as the de-duplication key. Assign card IDs in first-seen order as `C01`, `C02`, etc. Empty rows still count as picks with a card containing an empty tuple. If the entire grid is empty, return no picks/cards and one warning. Do not add uneeded options.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `python -m unittest tests.domain.test_compiler -v` with `PYTHONPATH=src`  
 Expected: 3 tests PASS.
 
-- [ ] **Step 5: Run full domain suite**
+- [x] **Step 5: Run full domain suite**
 
 Run: `python -m unittest discover -s tests/domain -v` with `PYTHONPATH=src`  
 Expected: all domain tests PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/jingwei/domain/compiler.py src/jingwei/domain/__init__.py tests/domain/test_compiler.py
@@ -195,7 +195,7 @@ git commit -m "feat: compile pattern rows into jacquard cards"
 - Produces: `WeaveMatrix(warp_count: int, weft_count: int, cells: tuple[tuple[bool, ...], ...])`
 - Produces: `build_weave_matrix(plan: WeavePlan) -> WeaveMatrix`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```python
 def test_weave_matrix_uses_each_pick_as_one_weft_row(self):
@@ -214,26 +214,26 @@ def test_malformed_plan_with_out_of_range_lift_is_rejected(self):
         build_weave_matrix(plan)
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `python -m unittest tests.domain.test_weaver -v` with `PYTHONPATH=src`  
 Expected: import failure because `build_weave_matrix` does not exist.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 For each `Pick`, create a row of `warp_count` booleans. Set `True` only at columns in `pick.lifted_warp`. Reject lifted indices outside `0..warp_count-1`. The result must have `weft_count` rows; if the pick count differs, raise `ValueError` so callers cannot silently export a partial result.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `python -m unittest tests.domain.test_weaver -v` with `PYTHONPATH=src`  
 Expected: 2 tests PASS.
 
-- [ ] **Step 5: Run all non-GUI tests**
+- [x] **Step 5: Run all non-GUI tests**
 
 Run: `python -m unittest discover -s tests -v` with `PYTHONPATH=src`  
 Expected: all tests PASS without importing PySide6.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/jingwei/domain/weaver.py src/jingwei/domain/__init__.py tests/domain/test_weaver.py
@@ -253,7 +253,7 @@ git commit -m "feat: generate deterministic weave matrix"
 - Produces: `cell_from_point(x: float, y: float, width: int, height: int, columns: int, rows: int) -> tuple[int, int] | None`
 - Produces: `cell_rect(column: int, row: int, width: int, height: int, columns: int, rows: int) -> tuple[float, float, float, float]`
 
-- [ ] **Step 1: Create the virtual environment and install PySide6**
+- [x] **Step 1: Create the virtual environment and install PySide6**
 
 Run with approval:
 
@@ -264,25 +264,25 @@ python -m venv .venv
 
 Expected: package import succeeds.
 
-- [ ] **Step 2: Write the failing geometry tests**
+- [x] **Step 2: Write the failing geometry tests**
 
 Test that a point at the top-left maps to `(0, 0)`, a point at the bottom-right inside the canvas maps to the final cell, and points exactly on the right/bottom edge or outside return `None`. Also test that `cell_rect` partitions the canvas without gaps.
 
-- [ ] **Step 3: Run test to verify it fails**
+- [x] **Step 3: Run test to verify it fails**
 
 Run: `.\.venv\Scripts\python.exe -m unittest tests.ui.test_canvas_geometry -v` with `PYTHONPATH=src`  
 Expected: import failure because `cell_from_point` does not exist.
 
-- [ ] **Step 4: Write minimal implementation**
+- [x] **Step 4: Write minimal implementation**
 
 Use integer arithmetic or `math.floor`. Clamp only after confirming the point is inside `0 <= x < width` and `0 <= y < height`. Reject non-positive canvas dimensions or cell counts.
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `.\.venv\Scripts\python.exe -m unittest tests.ui.test_canvas_geometry -v` with `PYTHONPATH=src`  
 Expected: 4 tests PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add pyproject.toml .gitignore src/jingwei/ui tests/ui
@@ -303,11 +303,11 @@ git commit -m "feat: add canvas geometry helpers"
 - Produces: `PatternCanvas.grid -> PatternGrid`
 - Produces: `PatternCanvas.set_erase_mode(enabled: bool) -> None`
 
-- [ ] **Step 1: Write the failing widget test**
+- [x] **Step 1: Write the failing widget test**
 
 Use `QT_QPA_PLATFORM=offscreen` and a `QApplication`. Assert that initial grid dimensions are correct, simulating a left press toggles the intended cell, right press or erase mode clears a cell, and `patternChanged` is emitted once per committed mouse move. Use `QTest.mouseClick` only for a real committed interaction.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -317,16 +317,16 @@ $env:QT_QPA_PLATFORM='offscreen'; $env:PYTHONPATH='src'; .\.venv\Scripts\python.
 
 Expected: import failure because `PatternCanvas` does not exist.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Subclass `QWidget`. Paint the grid with `QPainter`, draw a light background and dark square for `True` cells. Convert mouse positions with `cell_from_point`. Left mouse presses/moves paint `True`; right mouse presses/moves paint `False`; the erase-mode property makes left button paint `False`. Emit `patternChanged` only when a cell value actually changes. Keep the widget independent of `MainWindow`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run the same command as Step 2  
 Expected: all canvas tests PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/jingwei/ui/pattern_canvas.py tests/ui/test_pattern_canvas.py
@@ -349,11 +349,11 @@ git commit -m "feat: add interactive point pattern canvas"
 - Produces CLI: `python -m jingwei`
 - Produces CLI: `python -m jingwei --smoke-test`
 
-- [ ] **Step 1: Write the failing service and smoke tests**
+- [x] **Step 1: Write the failing service and smoke tests**
 
 Service test uses a simple grid and asserts `compile_service.compile(grid)` returns a `WeavePlan` with the expected number of picks. Smoke test starts `QApplication` with offscreen platform, constructs `MainWindow`, invokes a compile on an example grid, and asserts the report label contains the card count. The smoke test must not require manual interaction.
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run:
 
@@ -363,13 +363,13 @@ $env:QT_QPA_PLATFORM='offscreen'; $env:PYTHONPATH='src'; .\.venv\Scripts\python.
 
 Expected: failure because `CompileService`, `MainWindow`, or entry point does not exist.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 `CompileService` delegates to `compile_pattern`; do not duplicate the algorithm. `MainWindow` contains a toolbar with “画笔”, “橡皮” and “编译花本”, a central `PatternCanvas`, and a right panel with `QLabel` compile summary. The compile action calls the service and displays original rows, unique cards, compression ratio, and warnings. If the grid changes after compile, mark the summary as “结果已过期”.
 
 `__main__.py` creates `QApplication`, constructs `MainWindow`, and calls `app.exec()`. `--smoke-test` constructs the window, performs a deterministic example compile, processes events, and exits with code 0.
 
-- [ ] **Step 4: Run smoke test to verify it passes**
+- [x] **Step 4: Run smoke test to verify it passes**
 
 Run:
 
@@ -384,7 +384,7 @@ Expected: PASS.
 Run: `$env:PYTHONPATH='src'; .\.venv\Scripts\python.exe -m jingwei`  
 Expected: a desktop window opens, drawing works, and compile summary appears. This manual run is not a substitute for the automated smoke test.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/jingwei/application src/jingwei/ui/main_window.py src/jingwei/__main__.py tests/test_smoke.py
@@ -403,7 +403,7 @@ git commit -m "feat: wire minimal drawing and compile workflow"
 - Produces: setup, test, run, and project structure instructions.
 - Produces: AI participation log entries for the implementation tasks.
 
-- [ ] **Step 1: Write the documentation tests/checklist**
+- [x] **Step 1: Write the documentation tests/checklist**
 
 Add a checklist in `tests/README.md` covering:
 
@@ -413,7 +413,7 @@ Add a checklist in `tests/README.md` covering:
 - offscreen GUI smoke test;
 - Windows-only manual check.
 
-- [ ] **Step 2: Run the full test suite**
+- [x] **Step 2: Run the full test suite**
 
 Run:
 
@@ -423,16 +423,16 @@ $env:QT_QPA_PLATFORM='offscreen'; $env:PYTHONPATH='src'; .\.venv\Scripts\python.
 
 Expected: all tests PASS.
 
-- [ ] **Step 3: Write README and AI log**
+- [x] **Step 3: Write README and AI log**
 
 Document exact setup and run commands. Record which code and tests were AI-assisted, the user's requirements, and the human review status.
 
-- [ ] **Step 4: Run the complete verification command one final time**
+- [x] **Step 4: Run the complete verification command one final time**
 
 Run the same full test command as Step 2.  
 Expected: all tests PASS, 0 failures.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add README.md tests/README.md docs/ai-log
