@@ -8,12 +8,15 @@ from jingwei.domain.compiler import (
     compile_pattern,
 )
 from jingwei.domain.models import PatternGrid
+from jingwei.domain.weaver import WeaveMatrix, build_weave_matrix
 
 __all__ = [
     "Card",
     "CompileReport",
     "PatternGrid",
     "Pick",
+    "WeaveMatrix",
     "WeavePlan",
+    "build_weave_matrix",
     "compile_pattern",
 ]
