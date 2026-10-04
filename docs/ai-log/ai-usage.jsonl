@@ -11,3 +11,4 @@
 {"id":"AI-20261004-011","date":"2026-10-04","tool":"Codex Desktop","stage":"GitHub发布准备与竞赛README","input":"GitHub上传要求、MVP代码与测试记录","output":"README、GitHub Actions、发布指南","human_review":"等待创建仓库并确认公开范围","status":"pending-remote"}
 {"id":"AI-20261004-012","date":"2026-10-04","tool":"Codex Desktop","stage":"GitHub首次推送与README完善","input":"GitHub仓库地址、发布计划","output":"远端main分支、竞赛README","human_review":"用户确认akbar747身份并授权推送","status":"ready-for-second-push"}
 {"id":"AI-20261004-013","date":"2026-10-04","tool":"Codex Desktop","stage":"GitHub推送复核","input":"本地main与origin/main","output":"远端SHA ace38f5与本地一致","human_review":"Git Credential Manager授权完成","status":"verified-remote"}
+{"id":"AI-20261004-014","date":"2026-10-04","tool":"Codex Desktop","stage":"Windows安装包与GitHub Release流水线","input":"Releases目标和MVP代码","output":"PyInstaller、Inno Setup、便携ZIP、Release工作流","human_review":"等待v0.1.0标签发布","status":"ready-to-tag"}

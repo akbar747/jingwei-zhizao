@@ -14,6 +14,13 @@
 
 ![MVP绘制与编译界面](docs/screenshots/mvp-drawing-compile.png)
 
+## 一键下载安装
+
+前往 [最新Release](https://github.com/akbar747/jingwei-zhizao/releases/latest) 下载对应文件：
+
+- `JingweiZhizao-Setup-0.1.0.exe`：推荐，双击安装，无需Python和管理员权限。
+- `JingweiZhizao-Portable-0.1.0.zip`：解压后直接运行，适合演示和课堂临时使用。
+- `SHA256SUMS.txt`：发布文件SHA256校验值。
 ## 评审快速体验
 
 1. 启动软件后，在中央点阵画布中使用左键绘制纹样。
