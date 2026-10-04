@@ -1,9 +1,9 @@
 #ifndef MyAppVersion
-#define MyAppVersion "0.1.6"
+#define MyAppVersion "0.1.7"
 #endif
 
 #ifndef MyOutputBaseFilename
-#define MyOutputBaseFilename "JingweiZhizao-Setup-0.1.6"
+#define MyOutputBaseFilename "JingweiZhizao-Setup-0.1.7"
 #endif
 
 [Setup]

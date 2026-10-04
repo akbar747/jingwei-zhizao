@@ -41,7 +41,14 @@ jobs:
           try {
             .\scripts\build_release.ps1 -Version $version
           } catch {
-            Write-Host "::error title=Build release assets failed::$($_.Exception.Message)"
+            $message = $_.Exception.Message
+            if ($env:GITHUB_STEP_SUMMARY) {
+              Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "## Release build failed"
+              Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '```text'
+              Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $message
+              Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '```'
+            }
+            Write-Host "::error title=Build release assets failed::$message"
             throw
           }
 
