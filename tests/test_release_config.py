@@ -19,7 +19,7 @@ class ReleaseConfigurationTests(unittest.TestCase):
         version = data["project"]["version"]
         package_dependencies = data["project"]["optional-dependencies"]["package"]
 
-        self.assertEqual(version, "0.1.1")
+        self.assertEqual(version, "0.1.2")
         self.assertIn("pyinstaller==6.22.3", package_dependencies)
 
     def test_release_workflow_is_tag_driven_and_has_write_permission(self):
@@ -41,10 +41,10 @@ class ReleaseConfigurationTests(unittest.TestCase):
         self.assertIn("JingweiZhizao-Setup-", installer)
 
     def test_release_notes_and_build_script_exist(self):
-        notes = (ROOT / "docs/releases/v0.1.1.md").read_text(encoding="utf-8")
+        notes = (ROOT / "docs/releases/v0.1.2.md").read_text(encoding="utf-8")
         script = (ROOT / "scripts/build_release.ps1").read_text(encoding="utf-8-sig")
 
-        self.assertIn("v0.1.1", notes)
+        self.assertIn("v0.1.2", notes)
         self.assertIn("JingweiZhizao-Portable-", script)
         self.assertIn("Get-FileHash", script)
 

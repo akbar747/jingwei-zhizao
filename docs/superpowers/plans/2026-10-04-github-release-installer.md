@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 为`v0.1.1`建立可一键下载安装的Windows安装程序、便携版ZIP和自动GitHub Release流程。
+**Goal:** 为`v0.1.2`建立可一键下载安装的Windows安装程序、便携版ZIP和自动GitHub Release流程。
 
 **Architecture:** PyInstaller把Python/PySide6应用构建为`--onedir --windowed`目录；PowerShell脚本运行测试、生成便携ZIP、调用Inno Setup生成无管理员权限的安装程序并计算SHA256；GitHub Actions在`v*`标签推送时构建并调用`gh release create`发布全部资产。
 
@@ -16,9 +16,9 @@
 - 最终用户无需安装Python或PySide6。
 - 应用核心功能必须离线运行。
 - 安装范围使用当前用户目录，默认不请求管理员权限。
-- 版本号以`pyproject.toml`的`0.1.1`为单一事实来源。
-- 发布资产命名必须稳定：`JingweiZhizao-Setup-0.1.1.exe`和`JingweiZhizao-Portable-0.1.1.zip`。
-- GitHub Release由标签`v0.1.1`触发，不手工上传构建目录。
+- 版本号以`pyproject.toml`的`0.1.2`为单一事实来源。
+- 发布资产命名必须稳定：`JingweiZhizao-Setup-0.1.2.exe`和`JingweiZhizao-Portable-0.1.2.zip`。
+- GitHub Release由标签`v0.1.2`触发，不手工上传构建目录。
 
 ## Review Focus
 
@@ -37,7 +37,7 @@
 - Create: `packaging/windows/installer.iss`
 - Create: `scripts/build_release.ps1`
 - Create: `.github/workflows/release.yml`
-- Create: `docs/releases/v0.1.1.md`
+- Create: `docs/releases/v0.1.2.md`
 - Modify: `pyproject.toml`
 - Modify: `.gitignore`
 
@@ -81,17 +81,17 @@
 
 **Files:**
 - Modify: `README.md`
-- Modify: `docs/releases/v0.1.1.md`
+- Modify: `docs/releases/v0.1.2.md`
 
 - [ ] README增加“一键下载安装”入口、安装步骤、便携版说明和系统要求。
 - [ ] Release说明列出主要功能、已知限制、安装方式和校验文件。
 - [ ] 确认所有相对链接可用。
 
-### Task 6: 发布v0.1.1
+### Task 6: 发布v0.1.2
 
 - [ ] 运行31项测试和冒烟检查。
 - [ ] 提交发布工程并推送到`main`。
-- [ ] 创建并推送标签`v0.1.1`。
+- [ ] 创建并推送标签`v0.1.2`。
 - [ ] 等待Release工作流完成。
 - [ ] 验证Release页面存在`Setup.exe`、`Portable.zip`和`SHA256SUMS.txt`。
 - [ ] 下载至少一个安装资产并校验SHA256。
