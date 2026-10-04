@@ -72,8 +72,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b $branch
           New-Item -ItemType Directory -Force -Path "diagnostics" | Out-Null
-          Copy-Item -LiteralPath "build\pyinstaller-build.log" -Destination "diagnostics\pyinstaller-$env:GITHUB_RUN_ID.log"
-          git add "diagnostics\pyinstaller-$env:GITHUB_RUN_ID.log"
+          Copy-Item -LiteralPath "build\pyinstaller-build.log" -Destination "diagnostics\pyinstaller-$env:GITHUB_RUN_ID.txt"
+          git add --force "diagnostics\pyinstaller-$env:GITHUB_RUN_ID.txt"
           git commit -m "diagnostics: PyInstaller log for $env:GITHUB_RUN_ID"
           git push origin "HEAD:refs/heads/$branch"
 
