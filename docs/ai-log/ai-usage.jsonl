@@ -2,3 +2,4 @@
 {"id":"AI-20261004-002","date":"2026-10-04","tool":"Codex Desktop","stage":"竞赛资料与获奖样本调研","input":"官网通知、参赛指南、评分标准、公开作品展示","output":"竞品分析与方向候选","human_review":"项目负责人确认项目方向和赛道","status":"confirmed"}
 {"id":"AI-20261004-003","date":"2026-10-04","tool":"Codex Desktop","stage":"项目策划书生成","input":"已确认的项目定义、技术选型、约束","output":"策划书v0.1","human_review":"待项目负责人评审","status":"pending"}
 {"id":"AI-20261004-004","date":"2026-10-04","tool":"Codex Desktop","stage":"技术可行性核验","input":"本机Python版本、PyPI包元数据","output":"PySide6与PyInstaller兼容性判断","human_review":"作为技术选型依据","status":"verified"}
+{"id":"AI-20261004-005","date":"2026-10-04","tool":"Codex Desktop","stage":"UI交互设计草案","input":"确认后的项目方向、策划书v0.1、PySide6选型","output":"docs/design/ui-interaction-design.md","human_review":"待项目负责人评审","status":"pending"}
