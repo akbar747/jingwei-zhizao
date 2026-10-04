@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "0.1.7",
+    [string]$Version = "0.1.8",
     [switch]$SkipInstaller
 )
 
@@ -51,6 +51,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "源码冒烟测试失败"
 }
 
+New-Item -ItemType Directory -Force -Path (Join-Path $Root "build\spec"), (Join-Path $Root "build\pyinstaller") | Out-Null
 $pyInstallerLog = Join-Path $Root "build\pyinstaller-build.log"
 $previousErrorPreference = $ErrorActionPreference
 $ErrorActionPreference = "Continue"
@@ -68,10 +69,17 @@ $pyInstallerExitCode = $LASTEXITCODE
 $ErrorActionPreference = $previousErrorPreference
 $pyInstallerOutput | Set-Content -LiteralPath $pyInstallerLog -Encoding UTF8
 if ($pyInstallerExitCode -ne 0) {
-    $tail = (Get-Content -Encoding UTF8 -LiteralPath $pyInstallerLog -Tail 12) -join " | "
-    $safeTail = $tail.Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
-    Write-Host "::error title=PyInstaller failed::$safeTail"
-    throw "PyInstaller构建失败(exit=$pyInstallerExitCode): $tail"
+    $errorLine = Get-Content -Encoding UTF8 -LiteralPath $pyInstallerLog |
+        Select-String -Pattern "Traceback|ModuleNotFoundError|PermissionError|FileNotFoundError|OSError|ERROR:" |
+        Select-Object -Last 1
+    if ($errorLine) {
+        $summaryLine = $errorLine.Line
+    } else {
+        $summaryLine = (Get-Content -Encoding UTF8 -LiteralPath $pyInstallerLog -Tail 1)
+    }
+    $safeLine = $summaryLine.Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
+    Write-Output "::error title=PyInstaller failed::$safeLine"
+    throw "PyInstaller构建失败(exit=$pyInstallerExitCode): $summaryLine"
 }
 
 $appDir = Join-Path $Root "dist\JingweiZhizao"
