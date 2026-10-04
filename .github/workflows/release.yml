@@ -60,6 +60,23 @@ jobs:
           path: build/pyinstaller-build.log
           if-no-files-found: ignore
 
+      - name: Publish PyInstaller diagnostics branch
+        if: failure()
+        shell: powershell
+        run: |
+          if (-not (Test-Path -LiteralPath "build\pyinstaller-build.log")) {
+            throw "PyInstaller diagnostic log is missing"
+          }
+          $branch = "diagnostics/release-$env:GITHUB_RUN_ID"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b $branch
+          New-Item -ItemType Directory -Force -Path "diagnostics" | Out-Null
+          Copy-Item -LiteralPath "build\pyinstaller-build.log" -Destination "diagnostics\pyinstaller-$env:GITHUB_RUN_ID.log"
+          git add "diagnostics\pyinstaller-$env:GITHUB_RUN_ID.log"
+          git commit -m "diagnostics: PyInstaller log for $env:GITHUB_RUN_ID"
+          git push origin "HEAD:refs/heads/$branch"
+
       - name: Publish GitHub Release
         shell: powershell
         env:
