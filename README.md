@@ -2,12 +2,25 @@
 
 > 一款把中国传统花楼提花工艺转化为“可设计、可编译、可织造、可验证”交互体验的非遗文化教育软件。
 
+[![Windows Tests](https://github.com/akbar747/jingwei-zhizao/actions/workflows/tests.yml/badge.svg)](https://github.com/akbar747/jingwei-zhizao/actions/workflows/tests.yml)
+![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-Windows-0078D4?logo=windows&logoColor=white)
+![Status](https://img.shields.io/badge/Status-MVP-2F6F5E)
+
 参赛方向：第十四届全国大学生数字媒体科技作品及创意竞赛  
 赛道定位：指定命题类——民族文化创新表达  
 作品形态：Windows离线桌面软件  
 当前状态：MVP原型已完成，核心链路已通过自动测试
 
 ![MVP绘制与编译界面](docs/screenshots/mvp-drawing-compile.png)
+
+## 评审快速体验
+
+1. 启动软件后，在中央点阵画布中使用左键绘制纹样。
+2. 使用右键或“橡皮”按钮擦除错误单元。
+3. 点击左侧“编译花本”。
+4. 在右侧查看原始织造行、唯一花本数量、压缩率和指令列表。
+5. 修改纹样后，界面会提示旧结果已过期；重新编译即可得到新结果。
 
 ## 一、项目解决的问题
 
@@ -60,7 +73,20 @@
 
 目标用户包括中学信息科技、劳动教育学生、博物馆科普观众和非遗教育工作者。软件不依赖网络，可以在普通Windows电脑、触摸屏或教学机房中运行。
 
-## 三、当前MVP功能
+## 三、功能完成度
+
+| 模块 | 当前状态 | 验证证据 |
+|---|---|---|
+| 点阵绘图与擦除 | 已完成 | 真实鼠标交互测试 |
+| 纹样边界与矩阵校验 | 已完成 | PatternGrid单元测试 |
+| 花本编译与重复行复用 | 已完成 | 编号顺序与次数测试 |
+| 织物矩阵生成 | 已完成 | 确定性与非法输入测试 |
+| 结果过期提示 | 已完成 | 主窗口冒烟测试 |
+| 织造动画与梭子可视化 | 计划中 | 尚未实现 |
+| PNG、CSV、WIF导出 | 计划中 | 尚未实现 |
+| Windows免安装程序 | 计划中 | 尚未实现 |
+
+### 已完成MVP
 
 - 16×16默认点阵画布。
 - 左键绘制、右键擦除、橡皮模式、清空纹样。
@@ -126,7 +152,8 @@
 ## 七、安装与运行
 
 ```powershell
-cd D:\aicode\jingwei-zhizao
+git clone https://github.com/akbar747/jingwei-zhizao.git
+cd jingwei-zhizao
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e .
 $env:PYTHONPATH='src'
@@ -176,6 +203,15 @@ jingwei-zhizao/
 ├─ pyproject.toml
 └─ README.md
 ```
+
+## 文档导航
+
+- [项目策划书](docs/superpowers/specs/2026-10-04-jingwei-zhizao-design.md)
+- [UI交互设计](docs/design/ui-interaction-design.md)
+- [MVP实施计划](docs/superpowers/plans/2026-10-04-mvp-drawing-compile.md)
+- [AI使用记录](docs/ai-log/2026-10-04.md)
+- [GitHub发布指南](docs/github-publish-guide.md)
+- [测试说明](tests/README.md)
 
 ## 十、开发与质量控制
 
