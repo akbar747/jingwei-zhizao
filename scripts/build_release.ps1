@@ -1,6 +1,5 @@
 param(
-    [string]$Version = "0.1.5",
-    [string]$PythonExecutable = "",
+    [string]$Version = "0.1.6",
     [switch]$SkipInstaller
 )
 
@@ -24,16 +23,9 @@ function Remove-WorkspaceDirectory {
     }
 }
 
-if ($PythonExecutable) {
-    $python = [System.IO.Path]::GetFullPath($PythonExecutable)
-    if (-not (Test-Path -LiteralPath $python)) {
-        throw "指定的Python解释器不存在: $python"
-    }
-} else {
-    $python = Join-Path $Root ".venv\Scripts\python.exe"
-    if (-not (Test-Path -LiteralPath $python)) {
-        $python = (Get-Command python.exe -ErrorAction Stop).Source
-    }
+$python = Join-Path $Root ".venv\Scripts\python.exe"
+if (-not (Test-Path -LiteralPath $python)) {
+    $python = (Get-Command python.exe -ErrorAction Stop).Source
 }
 
 foreach ($target in @(

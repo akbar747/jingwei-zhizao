@@ -38,10 +38,8 @@ jobs:
         run: |
           $tag = $env:GITHUB_REF_NAME
           $version = $tag.TrimStart("v")
-          $pythonExe = (Get-Command python.exe -ErrorAction Stop).Source
-          Write-Host "Using Python: $pythonExe"
           try {
-            .\scripts\build_release.ps1 -Version $version -PythonExecutable $pythonExe
+            .\scripts\build_release.ps1 -Version $version
           } catch {
             Write-Host "::error title=Build release assets failed::$($_.Exception.Message)"
             throw

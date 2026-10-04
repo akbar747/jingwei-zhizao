@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "jingwei-zhizao"
-version = "0.1.5"
+version = "0.1.6"
 description = "花楼提花机可编程密码桌面交互教学软件"
 requires-python = ">=3.14"
 dependencies = [
