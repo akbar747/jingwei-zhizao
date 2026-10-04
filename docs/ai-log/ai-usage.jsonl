@@ -4,3 +4,6 @@
 {"id":"AI-20261004-004","date":"2026-10-04","tool":"Codex Desktop","stage":"技术可行性核验","input":"本机Python版本、PyPI包元数据","output":"PySide6与PyInstaller兼容性判断","human_review":"作为技术选型依据","status":"verified"}
 {"id":"AI-20261004-005","date":"2026-10-04","tool":"Codex Desktop","stage":"UI交互设计草案","input":"确认后的项目方向、策划书v0.1、PySide6选型","output":"docs/design/ui-interaction-design.md","human_review":"待项目负责人评审","status":"pending"}
 {"id":"AI-20261004-006","date":"2026-10-04","tool":"Codex Desktop","stage":"MVP实施计划","input":"策划书、UI设计与当前MVP任务","output":"docs/superpowers/plans/2026-10-04-mvp-drawing-compile.md","human_review":"依据用户进入开发阶段指令执行","status":"confirmed"}
+{"id":"AI-20261004-007","date":"2026-10-04","tool":"Codex Desktop","stage":"核心算法TDD实现","input":"MVP实施计划、数据语义","output":"PatternGrid、编译服务、花本编译、织物矩阵及测试","human_review":"依据开发授权执行","status":"verified"}
+{"id":"AI-20261004-008","date":"2026-10-04","tool":"Codex Desktop","stage":"PySide6画布与主窗口实现","input":"UI设计、MVP计划","output":"PatternCanvas、MainWindow、应用入口","human_review":"真实桌面视觉验收待完成","status":"pending-human-visual-review"}
+{"id":"AI-20261004-009","date":"2026-10-04","tool":"Codex Desktop","stage":"自动验证与兼容性初检","input":"完整测试集和冒烟入口","output":"26项测试通过；离屏冒烟退出码0","human_review":"待人工Windows运行验证","status":"verified-automated"}
