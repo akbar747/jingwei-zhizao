@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "0.1.0",
+    [string]$Version = "0.1.1",
     [switch]$SkipInstaller
 )
 
@@ -25,7 +25,7 @@ function Remove-WorkspaceDirectory {
 
 $python = Join-Path $Root ".venv\Scripts\python.exe"
 if (-not (Test-Path -LiteralPath $python)) {
-    throw "未找到虚拟环境: $python"
+    $python = (Get-Command python.exe -ErrorAction Stop).Source
 }
 
 foreach ($target in @(
