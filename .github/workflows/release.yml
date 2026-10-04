@@ -38,7 +38,7 @@ jobs:
         run: |
           $tag = $env:GITHUB_REF_NAME
           $version = $tag.TrimStart("v")
-          $pythonExe = (python -c "import sys; print(sys.executable)").Trim()
+          $pythonExe = (Get-Command python.exe -ErrorAction Stop).Source
           Write-Host "Using Python: $pythonExe"
           try {
             .\scripts\build_release.ps1 -Version $version -PythonExecutable $pythonExe

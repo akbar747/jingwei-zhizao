@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "0.1.4",
+    [string]$Version = "0.1.5",
     [string]$PythonExecutable = "",
     [switch]$SkipInstaller
 )
@@ -77,7 +77,8 @@ $ErrorActionPreference = $previousErrorPreference
 $pyInstallerOutput | Set-Content -LiteralPath $pyInstallerLog -Encoding UTF8
 if ($pyInstallerExitCode -ne 0) {
     $tail = (Get-Content -Encoding UTF8 -LiteralPath $pyInstallerLog -Tail 12) -join " | "
-    Write-Host "::error title=PyInstaller failed::$tail"
+    $safeTail = $tail.Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
+    Write-Host "::error title=PyInstaller failed::$safeTail"
     throw "PyInstaller构建失败(exit=$pyInstallerExitCode): $tail"
 }
 
