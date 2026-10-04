@@ -1,5 +1,6 @@
 param(
-    [string]$Version = "0.1.3",
+    [string]$Version = "0.1.4",
+    [string]$PythonExecutable = "",
     [switch]$SkipInstaller
 )
 
@@ -23,9 +24,16 @@ function Remove-WorkspaceDirectory {
     }
 }
 
-$python = Join-Path $Root ".venv\Scripts\python.exe"
-if (-not (Test-Path -LiteralPath $python)) {
-    $python = (Get-Command python.exe -ErrorAction Stop).Source
+if ($PythonExecutable) {
+    $python = [System.IO.Path]::GetFullPath($PythonExecutable)
+    if (-not (Test-Path -LiteralPath $python)) {
+        throw "指定的Python解释器不存在: $python"
+    }
+} else {
+    $python = Join-Path $Root ".venv\Scripts\python.exe"
+    if (-not (Test-Path -LiteralPath $python)) {
+        $python = (Get-Command python.exe -ErrorAction Stop).Source
+    }
 }
 
 foreach ($target in @(
@@ -69,6 +77,7 @@ $ErrorActionPreference = $previousErrorPreference
 $pyInstallerOutput | Set-Content -LiteralPath $pyInstallerLog -Encoding UTF8
 if ($pyInstallerExitCode -ne 0) {
     $tail = (Get-Content -Encoding UTF8 -LiteralPath $pyInstallerLog -Tail 12) -join " | "
+    Write-Host "::error title=PyInstaller failed::$tail"
     throw "PyInstaller构建失败(exit=$pyInstallerExitCode): $tail"
 }
 
