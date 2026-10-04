@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "0.2.0",
+    [string]$Version = "0.2.1",
     [switch]$SkipInstaller
 )
 
@@ -77,14 +77,17 @@ if ($pyInstallerExitCode -ne 0) {
     } else {
         $summaryLine = (Get-Content -Encoding UTF8 -LiteralPath $pyInstallerLog -Tail 1)
     }
-    $safeLine = $summaryLine.Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
+    $shortLine = $summaryLine.Replace("`r", " ").Replace("`n", " ")
+    if ($shortLine.Length -gt 600) {
+        $shortLine = $shortLine.Substring(0, 600)
+    }
     if ($env:GITHUB_STEP_SUMMARY) {
         Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "## PyInstaller failed"
         Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '```text'
-        Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summaryLine
+        Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $shortLine
         Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '```'
     }
-    Write-Output "::error title=PyInstaller failed::$safeLine"
+    Write-Host "::error::$shortLine"
     throw "PyInstaller构建失败(exit=$pyInstallerExitCode): $summaryLine"
 }
 
