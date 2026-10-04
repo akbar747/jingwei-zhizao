@@ -3,7 +3,7 @@
 > 一款把中国传统花楼提花工艺转化为“可设计、可编译、可织造、可验证”交互体验的非遗文化教育软件。
 
 [![Windows Tests](https://github.com/akbar747/jingwei-zhizao/actions/workflows/tests.yml/badge.svg)](https://github.com/akbar747/jingwei-zhizao/actions/workflows/tests.yml)
-![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.13%2B-3776AB?logo=python&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platform-Windows-0078D4?logo=windows&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-MVP-2F6F5E)
 
@@ -18,8 +18,8 @@
 
 前往 [最新Release](https://github.com/akbar747/jingwei-zhizao/releases/latest) 下载对应文件：
 
-- `JingweiZhizao-Setup-0.1.10.exe`：推荐，双击安装，无需Python和管理员权限。
-- `JingweiZhizao-Portable-0.1.10.zip`：解压后直接运行，适合演示和课堂临时使用。
+- `JingweiZhizao-Setup-0.2.0.exe`：推荐，双击安装，无需Python和管理员权限。
+- `JingweiZhizao-Portable-0.2.0.zip`：解压后直接运行，适合演示和课堂临时使用。
 - `SHA256SUMS.txt`：发布文件SHA256校验值。
 ## 评审快速体验
 
@@ -141,7 +141,7 @@
 
 技术选型：
 
-- Python 3.14
+- Python 3.13+（发布构建固定为3.13）
 - PySide6-Essentials 6.11.2
 - Python标准库 `unittest`
 - 领域层零Qt依赖
