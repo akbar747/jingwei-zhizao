@@ -52,6 +52,14 @@ jobs:
             throw
           }
 
+      - name: Upload build diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-build-diagnostics
+          path: build/pyinstaller-build.log
+          if-no-files-found: ignore
+
       - name: Publish GitHub Release
         shell: powershell
         env:
