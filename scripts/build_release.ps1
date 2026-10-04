@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "0.1.2",
+    [string]$Version = "0.1.3",
     [switch]$SkipInstaller
 )
 
@@ -51,7 +51,10 @@ if ($LASTEXITCODE -ne 0) {
     throw "源码冒烟测试失败"
 }
 
-& $python -m PyInstaller `
+$pyInstallerLog = Join-Path $Root "build\pyinstaller-build.log"
+$previousErrorPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+$pyInstallerOutput = & $python -m PyInstaller `
     --noconfirm `
     --clean `
     --windowed `
@@ -60,9 +63,13 @@ if ($LASTEXITCODE -ne 0) {
     --workpath build\pyinstaller `
     --specpath build\spec `
     --paths src `
-    src\jingwei\__main__.py
-if ($LASTEXITCODE -ne 0) {
-    throw "PyInstaller构建失败"
+    src\jingwei\__main__.py 2>&1
+$pyInstallerExitCode = $LASTEXITCODE
+$ErrorActionPreference = $previousErrorPreference
+$pyInstallerOutput | Set-Content -LiteralPath $pyInstallerLog -Encoding UTF8
+if ($pyInstallerExitCode -ne 0) {
+    $tail = (Get-Content -Encoding UTF8 -LiteralPath $pyInstallerLog -Tail 12) -join " | "
+    throw "PyInstaller构建失败(exit=$pyInstallerExitCode): $tail"
 }
 
 $appDir = Join-Path $Root "dist\JingweiZhizao"
