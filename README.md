@@ -10,7 +10,7 @@
 参赛方向：第十四届全国大学生数字媒体科技作品及创意竞赛  
 赛道定位：指定命题类——民族文化创新表达  
 作品形态：Windows离线桌面软件  
-当前状态：织造工坊 Game Loop 已完成，含三星评级、纹样收藏册、进度存档、订单变体与作品卡导出
+当前状态：织造工坊 Game Loop 已完成，含三星评级、纹样收藏册、进度存档、订单变体、纹样炼成、撤销重做、通关庆典与作品卡导出
 
 ![织造工坊连击、三星评价与订单](docs/screenshots/game-upgrade-album.png)
 
@@ -23,6 +23,16 @@
 3. **编译**：把纹样编译为花本指令，界面即时给出“连击 xN”“复用 N 行”的压缩反馈。
 4. **织造**：点击“开始织造”或“下一梭”，在限时内逐梭推进，观察梭子穿行与布料生长。
 5. **收藏**：完成后按“形 / 技 / 速”三颗星结算，成绩写入 `%APPDATA%\JingweiZhizao\progress.json`，目标纹样收入纹样收藏册，并解锁下一关。
+
+### 纹样炼成与编辑手感
+
+- **一键对称**：左右镜像、上下镜像、四向圆满、对角翻折，把一小段手绘自动扩展成传统织锦常见的对称构图。
+- **整笔撤销/重做**：一次拖动算一笔，`Ctrl+Z` / `Ctrl+Y` 可整体撤销或恢复；纹样炼成同样一步可撤销。
+- **通关庆典**：织造完成后弹出结算层，展示成品织物、扩散粒子、三颗星、匹配率、压缩率与鼓励文案，并可直接导出作品卡或进入下一关。
+
+![纹样炼成与对称工具](docs/screenshots/game-upgrade-alchemy.png)
+
+![通关庆典结算](docs/screenshots/game-upgrade-finale.png)
 
 ### 三星评级：同一件作品，三重目标
 
@@ -53,13 +63,17 @@
 ![纹样收藏册](docs/screenshots/game-upgrade-collection.png)
 
 ![织锦作品卡示例](docs/screenshots/sample-artifact-card.png)
-## 一键下载安装
+## 运行方式
 
-前往 [最新Release](https://github.com/akbar747/jingwei-zhizao/releases/latest) 下载对应文件：
+当前 `main` 分支源码已包含完整升级（可通过下方“安装与运行”从源码启动）。
+
+已发布的可下载安装包为 `v0.2.9`，可通过 [最新 Release](https://github.com/akbar747/jingwei-zhizao/releases/latest) 获取：
 
 - `JingweiZhizao-Setup-0.2.9.exe`：推荐，双击安装，无需Python和管理员权限。
 - `JingweiZhizao-Portable-0.2.9.zip`：解压后直接运行，适合演示和课堂临时使用。
 - `SHA256SUMS.txt`：发布文件SHA256校验值。
+
+> 说明：`0.3.0` 的新玩法（纹样炼成、撤销重做、通关庆典）已合并到 `main` 源码，安装包将在下一次打包时同步更新。
 ## 评审快速体验
 
 1. 启动软件，默认进入第 1 关，顶部显示随机订单与倒计时。
@@ -135,6 +149,9 @@
 | 织坊订单变体 | 已完成 | 订单修饰与门槛测试 |
 | 逐梭织造预览与完成粒子 | 已完成 | 织造动画状态机测试 |
 | 织锦作品卡 PNG 导出 | 已完成 | Artifact 渲染与保存测试 |
+| 纹样炼成对称工具 | 已完成 | Symmetry 变换与撤销测试 |
+| 整笔撤销/重做 | 已完成 | PatternHistory 单元测试与冒烟测试 |
+| 通关庆典结算层 | 已完成 | Finale 摘要与覆盖层测试 |
 | 精细3D花楼和布料物理 | 计划中 | 尚未实现 |
 | CSV、WIF导出 | 计划中 | 尚未实现 |
 | Windows免安装程序 | 计划中 | 尚未实现 |
@@ -148,7 +165,9 @@
 - 织物矩阵生成和非法数据校验，逐梭织造动画与完成粒子庆祝。
 - 三颗独立星级（形/技/速）与五种织坊订单变体。
 - 纹样收藏册、关卡解锁与 JSON 进度存档。
-- 织锦作品卡 PNG 导出。
+- 纹样炼成：一键左右/上下/四向/对角对称，可整体撤销。
+- 整笔撤销/重做（撤销、重做按钮与 Ctrl+Z/Ctrl+Y）。
+- 通关庆典结算层与织锦作品卡 PNG 导出。
 - Qt离屏冒烟测试，可在无人点击环境验证主流程。
 - Windows CI自动测试配置。
 
@@ -185,6 +204,12 @@
   ProgressStore（进度存档）
   Album（纹样收藏册）
   ArtifactCard（作品卡渲染）
+  ResultSummary（通关结算摘要）
+
+编辑层 ui
+  PatternHistory（撤销/重做）
+  SymmetryMode（纹样炼成）
+  CelebrationOverlay（通关庆典）
 
 测试
   Unit Tests
@@ -239,7 +264,7 @@ $env:PYTHONPATH='src'
 当前验证结果：
 
 ```text
-Ran 95 tests
+Ran 118 tests
 OK
 Smoke test exit code: 0
 ```
