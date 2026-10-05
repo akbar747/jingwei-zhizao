@@ -1,4 +1,4 @@
-﻿"""可交互的点阵纹样画布。"""
+"""可交互的点阵纹样画布。"""
 
 from __future__ import annotations
 
@@ -24,6 +24,7 @@ class PatternCanvas(QWidget):
         super().__init__(parent)
         self._grid = grid
         self._erase_mode = False
+        self._read_only = False
         self._is_painting = False
         self._paint_value = True
         self.setMinimumSize(320, 320)
@@ -46,6 +47,11 @@ class PatternCanvas(QWidget):
     def set_erase_mode(self, enabled: bool) -> None:
         """设置左键是否切换为擦除操作。"""
         self._erase_mode = bool(enabled)
+
+    def set_read_only(self, enabled: bool) -> None:
+        """设置只读预览，禁止鼠标修改纹样。"""
+        self._read_only = bool(enabled)
+        self._is_painting = False
 
     def _value_for_button(self, button: Qt.MouseButton) -> bool | None:
         """把鼠标按钮转换为单元值；未知按钮返回 None。"""
@@ -78,6 +84,9 @@ class PatternCanvas(QWidget):
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         """开始一次鼠标绘制操作。"""
+        if self._read_only:
+            event.ignore()
+            return
         value = self._value_for_button(event.button())
         if value is None:
             super().mousePressEvent(event)
