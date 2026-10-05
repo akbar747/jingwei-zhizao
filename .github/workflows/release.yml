@@ -58,8 +58,9 @@ jobs:
         with:
           name: release-build-diagnostics
           path: |
-            build/*.log
-            build/**/warn-*.txt
+            ${{ github.workspace }}/build/*.log
+            ${{ github.workspace }}/build/**/warn-*.txt
+          retention-days: 1
           if-no-files-found: warn
           include-hidden-files: true
 
