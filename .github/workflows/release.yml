@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   build-release:
@@ -60,22 +61,20 @@ jobs:
           path: build/pyinstaller-build.log
           if-no-files-found: ignore
 
-      - name: Publish PyInstaller diagnostics branch
+      - name: Publish PyInstaller diagnostics issue
         if: failure()
         shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if (-not (Test-Path -LiteralPath "build\pyinstaller-build.log")) {
-            throw "PyInstaller diagnostic log is missing"
+          $diagnosticPath = "build\pyinstaller-build.log"
+          if (-not (Test-Path -LiteralPath $diagnosticPath)) {
+            Set-Content -LiteralPath $diagnosticPath -Value "PyInstaller diagnostic log was not created." -Encoding UTF8
           }
-          $branch = "diagnostics/release-$env:GITHUB_RUN_ID"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b $branch
-          New-Item -ItemType Directory -Force -Path "diagnostics" | Out-Null
-          Copy-Item -LiteralPath "build\pyinstaller-build.log" -Destination "diagnostics\pyinstaller-$env:GITHUB_RUN_ID.txt"
-          git add --force "diagnostics\pyinstaller-$env:GITHUB_RUN_ID.txt"
-          git commit -m "diagnostics: PyInstaller log for $env:GITHUB_RUN_ID"
-          git push origin "HEAD:refs/heads/$branch"
+          gh issue create `
+            --repo $env:GITHUB_REPOSITORY `
+            --title "Release diagnostics $env:GITHUB_RUN_ID" `
+            --body-file $diagnosticPath
 
       - name: Publish GitHub Release
         shell: powershell
