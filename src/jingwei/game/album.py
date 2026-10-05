@@ -1,4 +1,4 @@
-"""纹样收藏册：把每个关卡的目标纹样整理成可收藏的文化条目。"""
+"""纹样收藏册：从民族文化纹样库生成可收藏条目。"""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from jingwei.domain.models import PatternGrid
 from jingwei.game.catalog import LEVELS
 from jingwei.game.levels import LevelDefinition
+from jingwei.game.motifs import MOTIFS
 from jingwei.game.progress import ProgressStore
 
 
@@ -18,6 +19,7 @@ class AlbumEntry:
     title: str
     motif: str
     cultural_note: str
+    reference: str
     level: LevelDefinition
 
     def create_grid(self) -> PatternGrid:
@@ -34,6 +36,7 @@ class AlbumSummary:
     title: str
     motif: str
     cultural_note: str
+    reference: str
     unlocked: bool
     stars: int | None
     best_score: float | None
@@ -45,51 +48,16 @@ class AlbumSummary:
     target: tuple[tuple[bool, ...], ...]
 
 
-def _entry(
-    level_index: int,
-    *,
-    title: str,
-    motif: str,
-    cultural_note: str,
-) -> AlbumEntry:
-    level = LEVELS[level_index]
-    return AlbumEntry(
+ALBUM: tuple[AlbumEntry, ...] = tuple(
+    AlbumEntry(
         level_id=level.level_id,
-        title=title,
-        motif=motif,
-        cultural_note=cultural_note,
+        title=motif.name,
+        motif=motif.motif_type,
+        cultural_note=motif.cultural_note,
+        reference=motif.reference,
         level=level,
     )
-
-
-ALBUM: tuple[AlbumEntry, ...] = (
-    _entry(
-        0,
-        title="第一根经线",
-        motif="闭合回纹",
-        cultural_note=(
-            "回纹源自新石器时代彩陶与商周青铜器的连续方折纹样，"
-            "在中国传统织锦中常以边框形式出现，寓意绵延不绝。"
-        ),
-    ),
-    _entry(
-        1,
-        title="菱纹锦",
-        motif="菱格纹",
-        cultural_note=(
-            "菱形几何纹是土家西兰卡普、壮锦与蜀锦共享的母题，"
-            "通过经纬交织的对角结构形成稳定的视觉中心。"
-        ),
-    ),
-    _entry(
-        2,
-        title="万纹回环",
-        motif="回环菱格",
-        cultural_note=(
-            "多层回环纹样把边框、菱格与回纹叠加，体现了传统织造"
-            "“以简驭繁”的构图智慧，也最适合展示花本压缩的威力。"
-        ),
-    ),
+    for level, motif in zip(LEVELS, MOTIFS)
 )
 
 _BY_LEVEL_ID: dict[str, AlbumEntry] = {entry.level_id: entry for entry in ALBUM}
@@ -116,6 +84,7 @@ def build_album_summaries(progress: ProgressStore) -> tuple[AlbumSummary, ...]:
                 title=entry.title,
                 motif=entry.motif,
                 cultural_note=entry.cultural_note,
+                reference=entry.reference,
                 unlocked=progress.is_level_unlocked(index),
                 stars=None if record is None else record.stars,
                 best_score=None if record is None else record.best_score,

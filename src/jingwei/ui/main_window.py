@@ -227,12 +227,12 @@ class MainWindow(QMainWindow):
         self.level_bar.setSpacing(6)
         self.level_buttons: list[QPushButton] = []
         for index, level in enumerate(LEVELS):
-            button = QPushButton(f"{index + 1}\n☆☆☆")
+            button = QPushButton(f"{index + 1}·{level.name}\n☆☆☆")
             button.setObjectName("levelButton")
-            button.setMinimumHeight(44)
+            button.setMinimumHeight(50)
             button.setToolTip(f"{level.name}：{level.description}")
             button.clicked.connect(lambda _=False, i=index: self.load_level(i))
-            self.level_bar.addWidget(button, 0, index)
+            self.level_bar.addWidget(button, index // 2, index % 2)
             self.level_buttons.append(button)
         layout.addLayout(self.level_bar)
 
@@ -511,7 +511,7 @@ class MainWindow(QMainWindow):
             stars = "★" * (record.stars if record else 0) + "☆" * (3 - (record.stars if record else 0))
             unlocked = self._progress.is_level_unlocked(index)
             marker = "" if unlocked else "🔒"
-            button.setText(f"{index + 1}{marker}\n{stars}")
+            button.setText(f"{index + 1}·{LEVELS[index].name}{marker}\n{stars}")
             button.setEnabled(unlocked)
             button.setProperty("current", index == self._level_index)
 

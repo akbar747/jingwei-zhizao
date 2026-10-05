@@ -7,14 +7,14 @@ from jingwei.game.levels import LevelDefinition
 
 
 class LevelCatalogTests(unittest.TestCase):
-    def test_catalog_has_three_unique_levels(self):
-        self.assertEqual(len(LEVELS), 3)
-        self.assertEqual(len({level.level_id for level in LEVELS}), 3)
-        self.assertEqual(len({level.name for level in LEVELS}), 3)
+    def test_catalog_has_unique_levels(self):
+        self.assertGreaterEqual(len(LEVELS), 6)
+        self.assertEqual(len({level.level_id for level in LEVELS}), len(LEVELS))
+        self.assertEqual(len({level.name for level in LEVELS}), len(LEVELS))
 
-    def test_level_sizes_match_the_campaign(self):
+    def test_first_three_sizes_match_the_tutorial_arc(self):
         self.assertEqual(
-            [(level.width, level.height) for level in LEVELS],
+            [(level.width, level.height) for level in LEVELS[:3]],
             [(8, 8), (12, 12), (16, 16)],
         )
 

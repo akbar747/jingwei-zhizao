@@ -44,7 +44,7 @@ class ArtifactTests(unittest.TestCase):
         )
 
         self.assertIsInstance(card, ArtifactCard)
-        self.assertEqual(card.title, "第一根经线")
+        self.assertEqual(card.title, self.level.name)
         self.assertEqual(card.stars, 3)
         self.assertEqual(card.score, self.stars.score)
         self.assertEqual(card.order_name, "常规订单")

@@ -97,14 +97,14 @@ class WeavingAlbumDialog(QDialog):
         self._progress = progress
         self._level_lookup = level_lookup
         self.setWindowTitle("纹样收藏册")
-        self.setMinimumSize(790, 660)
+        self.setMinimumSize(860, 760)
 
         root = QVBoxLayout(self)
         root.setContentsMargins(16, 16, 16, 16)
         root.setSpacing(12)
 
         heading = QLabel(
-            f"纹样收藏册 · 已收集 {self._collected_count()} / 3 · "
+            f"纹样收藏册 · 已收集 {self._collected_count()} / {len(build_album_summaries(progress))} · "
             f"累计 {progress.total_stars()} 星"
         )
         heading.setObjectName("albumHeading")
