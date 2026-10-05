@@ -33,6 +33,7 @@ from jingwei.game.stars import StarEngine, StarResult
 from jingwei.game.finale import build_result_summary
 from jingwei.ui.album_dialog import WeavingAlbumDialog
 from jingwei.ui.celebration_overlay import CelebrationOverlay
+from jingwei.ui.operations import SymmetryMode, apply_symmetry, describe_symmetry
 from jingwei.ui.pattern_canvas import PatternCanvas
 from jingwei.ui.sound_player import SoundPlayer
 from jingwei.ui.weave_preview import WeavePreview
@@ -75,7 +76,7 @@ class MainWindow(QMainWindow):
         )
 
         self.setWindowTitle("经纬智造 · 织造工坊")
-        self.setMinimumSize(1220, 860)
+        self.setMinimumSize(1220, 900)
 
         self._build_ui()
         self._connect_signals()
@@ -167,9 +168,10 @@ class MainWindow(QMainWindow):
         panel = QFrame()
         panel.setObjectName("sidePanel")
         panel.setFixedWidth(210)
+        panel.setMinimumHeight(760)
         layout = QVBoxLayout(panel)
-        layout.setContentsMargins(14, 14, 14, 14)
-        layout.setSpacing(9)
+        layout.setContentsMargins(14, 12, 14, 12)
+        layout.setSpacing(6)
         title = QLabel("工匠工具")
         title.setObjectName("panelTitle")
         layout.addWidget(title)
@@ -182,7 +184,7 @@ class MainWindow(QMainWindow):
         self.compile_button = QPushButton("编译花本")
         self.compile_button.setObjectName("primaryButton")
         for button in (self.paint_button, self.erase_button, self.clear_button, self.compile_button):
-            button.setMinimumHeight(36)
+            button.setMinimumHeight(32)
             layout.addWidget(button)
 
         history_row = QHBoxLayout()
@@ -195,7 +197,28 @@ class MainWindow(QMainWindow):
         history_row.addWidget(self.redo_button)
         layout.addLayout(history_row)
 
-        layout.addSpacing(6)
+        alchemy_title = QLabel("纹样炼成")
+        alchemy_title.setObjectName("panelTitle")
+        layout.addWidget(alchemy_title)
+        self.alchemy_buttons: dict[SymmetryMode, QPushButton] = {}
+        alchemy_grid = QGridLayout()
+        alchemy_grid.setSpacing(6)
+        for index, mode in enumerate(
+            (
+                SymmetryMode.HORIZONTAL,
+                SymmetryMode.VERTICAL,
+                SymmetryMode.QUAD,
+                SymmetryMode.DIAGONAL,
+            )
+        ):
+            button = QPushButton(mode.label)
+            button.setToolTip(mode.description)
+            button.setMinimumHeight(32)
+            button.clicked.connect(lambda _=False, m=mode: self.apply_alchemy(m))
+            alchemy_grid.addWidget(button, index // 2, index % 2)
+            self.alchemy_buttons[mode] = button
+        layout.addLayout(alchemy_grid)
+
         level_title = QLabel("织造关卡")
         level_title.setObjectName("panelTitle")
         layout.addWidget(level_title)
@@ -203,15 +226,15 @@ class MainWindow(QMainWindow):
         self.level_bar.setSpacing(6)
         self.level_buttons: list[QPushButton] = []
         for index, level in enumerate(LEVELS):
-            button = QPushButton(f"{index + 1}. {level.name}\n☆☆☆")
+            button = QPushButton(f"{index + 1}\n☆☆☆")
             button.setObjectName("levelButton")
-            button.setMinimumHeight(46)
+            button.setMinimumHeight(44)
+            button.setToolTip(f"{level.name}：{level.description}")
             button.clicked.connect(lambda _=False, i=index: self.load_level(i))
-            self.level_bar.addWidget(button, index // 2, index % 2)
+            self.level_bar.addWidget(button, 0, index)
             self.level_buttons.append(button)
         layout.addLayout(self.level_bar)
 
-        layout.addSpacing(6)
         self.album_button = QPushButton("纹样收藏册")
         self.album_button.setObjectName("goldButton")
         self.album_button.setMinimumHeight(38)
@@ -220,11 +243,6 @@ class MainWindow(QMainWindow):
         self.export_button.setMinimumHeight(36)
         layout.addWidget(self.export_button)
         layout.addStretch(1)
-
-        tip = QLabel("左键绘制，右键擦除。\n三星 = 形（匹配）+ 技（压缩）+ 速（限时）。")
-        tip.setWordWrap(True)
-        tip.setObjectName("hintText")
-        layout.addWidget(tip)
         return panel
 
     def _build_center_panel(self) -> QWidget:
@@ -401,6 +419,24 @@ class MainWindow(QMainWindow):
         self._invalidate_plan("纹样已清空：请重新绘制并编译")
         self._update_report_placeholder("纹样已清空")
 
+    def apply_alchemy(self, mode: SymmetryMode) -> None:
+        """一键把当前纹样炼成传统对称构图，可整体撤销。"""
+
+        if self.canvas.grid.is_empty():
+            self.status_label.setText("纹样炼成：请先画出至少一个单元。")
+            return
+        action = describe_symmetry(self.canvas.grid, mode)
+        if action.is_empty:
+            self.status_label.setText(f"纹样炼成：{mode.label}没有产生新的单元。")
+            return
+        self.canvas.history.push(action)
+        apply_symmetry(self.canvas.grid, mode)
+        self.canvas.update()
+        self.canvas.canUndoChanged.emit(self.canvas.history.can_undo)
+        self.canvas.canRedoChanged.emit(self.canvas.history.can_redo)
+        self.canvas.patternChanged.emit()
+        self.status_label.setText(f"纹样炼成：已应用“{mode.label}”。")
+
     def _on_pattern_changed(self) -> None:
         if self._current_plan is not None:
             self._invalidate_plan("结果已过期：请重新点击“编译花本”")
@@ -447,7 +483,7 @@ class MainWindow(QMainWindow):
             stars = "★" * (record.stars if record else 0) + "☆" * (3 - (record.stars if record else 0))
             unlocked = self._progress.is_level_unlocked(index)
             marker = "" if unlocked else "🔒"
-            button.setText(f"{index + 1}. {LEVELS[index].name} {marker}\n{stars}")
+            button.setText(f"{index + 1}{marker}\n{stars}")
             button.setEnabled(unlocked)
             button.setProperty("current", index == self._level_index)
 

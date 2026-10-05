@@ -13,6 +13,7 @@ from jingwei.domain.models import PatternGrid
 from jingwei.game.catalog import LEVELS, get_level
 from jingwei.game.orders import OrderModifier
 from jingwei.game.progress import ProgressStore
+from jingwei.ui.operations import SymmetryMode
 from jingwei.ui.main_window import MainWindow
 
 
@@ -112,6 +113,23 @@ class MainWindowSmokeTests(unittest.TestCase):
 
         self.assertIn("织造完成", window.complete_label.text())
         self.assertIn("★★★", window.complete_label.text())
+        window.close()
+
+    def test_alchemy_expands_and_is_undoable(self):
+        window = self._window()
+        window.canvas.grid.set(0, 0, True)
+        window.canvas.update()
+
+        window.apply_alchemy(SymmetryMode.QUAD)
+        far = window.canvas.grid.width - 1
+
+        self.assertTrue(window.canvas.grid.get(far, 0))
+        self.assertTrue(window.canvas.grid.get(0, far))
+        self.assertTrue(window.canvas.grid.get(far, far))
+
+        window.canvas.undo()
+
+        self.assertFalse(window.canvas.grid.get(far, 0))
         window.close()
 
     def test_undo_redo_buttons_follow_history(self):
