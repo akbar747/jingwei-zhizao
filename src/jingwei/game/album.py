@@ -37,6 +37,11 @@ class AlbumSummary:
     unlocked: bool
     stars: int | None
     best_score: float | None
+    match_ratio: float | None
+    compression_ratio: float | None
+    shape_star: bool
+    craft_star: bool
+    speed_star: bool
     target: tuple[tuple[bool, ...], ...]
 
 
@@ -114,6 +119,11 @@ def build_album_summaries(progress: ProgressStore) -> tuple[AlbumSummary, ...]:
                 unlocked=progress.is_level_unlocked(index),
                 stars=None if record is None else record.stars,
                 best_score=None if record is None else record.best_score,
+                match_ratio=None if record is None else record.match_ratio,
+                compression_ratio=None if record is None else record.compression_ratio,
+                shape_star=False if record is None else record.shape_star,
+                craft_star=False if record is None else record.craft_star,
+                speed_star=False if record is None else record.speed_star,
                 target=entry.level.target,
             )
         )

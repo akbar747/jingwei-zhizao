@@ -18,11 +18,16 @@ from jingwei.game.catalog import LEVELS
 
 @dataclass(frozen=True)
 class LevelRecord:
-    """一个关卡的历史最佳成绩。"""
+    """一个关卡的历史最佳成绩，包含三颗星的完整明细。"""
 
     stars: int
     best_score: float
     completed_at: float
+    match_ratio: float = 0.0
+    compression_ratio: float = 0.0
+    shape_star: bool = False
+    craft_star: bool = False
+    speed_star: bool = False
 
     def __post_init__(self) -> None:
         if not isinstance(self.stars, int) or not 0 <= self.stars <= 3:
@@ -47,6 +52,7 @@ class ProgressStore:
 
     def __init__(self, path: Path | None = None, *, load: bool = True) -> None:
         self.path = Path(path) if path is not None else default_progress_path()
+        self._in_memory = not load
         self._records: dict[str, LevelRecord] = {}
         if load:
             self._load()
@@ -86,10 +92,24 @@ class ProgressStore:
         stars: int,
         score: float,
         completed_at: float,
+        match_ratio: float = 0.0,
+        compression_ratio: float = 0.0,
+        shape_star: bool = False,
+        craft_star: bool = False,
+        speed_star: bool = False,
     ) -> LevelRecord:
         """记录一次成绩，仅当星级或分数更好时覆盖历史最佳。"""
 
-        candidate = LevelRecord(stars=stars, best_score=float(score), completed_at=completed_at)
+        candidate = LevelRecord(
+            stars=stars,
+            best_score=float(score),
+            completed_at=completed_at,
+            match_ratio=float(match_ratio),
+            compression_ratio=float(compression_ratio),
+            shape_star=bool(shape_star),
+            craft_star=bool(craft_star),
+            speed_star=bool(speed_star),
+        )
         existing = self._records.get(level_id)
         if existing is not None and (candidate.stars, candidate.best_score) <= (
             existing.stars,
@@ -100,8 +120,13 @@ class ProgressStore:
         return candidate
 
     def save(self) -> None:
-        """原子写入 JSON，避免写入中途崩溃损坏存档。"""
+        """原子写入 JSON，避免写入中途崩溃损坏存档。
 
+        内存存档（``in_memory``）不落盘，供测试和自由模式使用。
+        """
+
+        if self._in_memory:
+            return
         self.path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
             "version": 1,
@@ -110,6 +135,11 @@ class ProgressStore:
                     "stars": record.stars,
                     "best_score": record.best_score,
                     "completed_at": record.completed_at,
+                    "match_ratio": record.match_ratio,
+                    "compression_ratio": record.compression_ratio,
+                    "shape_star": record.shape_star,
+                    "craft_star": record.craft_star,
+                    "speed_star": record.speed_star,
                 }
                 for level_id, record in self._records.items()
             },
@@ -141,6 +171,11 @@ class ProgressStore:
                     stars=int(raw["stars"]),
                     best_score=float(raw["best_score"]),
                     completed_at=float(raw["completed_at"]),
+                    match_ratio=float(raw.get("match_ratio", 0.0)),
+                    compression_ratio=float(raw.get("compression_ratio", 0.0)),
+                    shape_star=bool(raw.get("shape_star", False)),
+                    craft_star=bool(raw.get("craft_star", False)),
+                    speed_star=bool(raw.get("speed_star", False)),
                 )
         except (OSError, ValueError, TypeError, KeyError, json.JSONDecodeError):
             self._records.clear()

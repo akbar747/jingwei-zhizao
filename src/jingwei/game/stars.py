@@ -115,3 +115,16 @@ class StarEngine:
             speed_star=speed_star,
             score=score,
         )
+
+def star_result_from_record(record) -> StarResult:
+    """从存档记录还原评级结果，用于收藏册展示与作品卡导出。"""
+
+    return StarResult(
+        match_ratio=record.match_ratio,
+        compression_ratio=record.compression_ratio,
+        elapsed_seconds=0.0,
+        shape_star=record.shape_star,
+        craft_star=record.craft_star,
+        speed_star=record.speed_star,
+        score=record.best_score,
+    )

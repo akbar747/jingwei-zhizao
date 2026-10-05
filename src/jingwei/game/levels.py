@@ -38,5 +38,13 @@ class LevelDefinition:
         return len(self.target)
 
     def create_grid(self) -> PatternGrid:
-        """创建与关卡目标一致的玩家画布。"""
+        """创建与关卡目标一致的画布（含目标图案，仅供预览/测试）。"""
+        return PatternGrid(self.width, self.height, [list(row) for row in self.target])
+
+    def create_blank_grid(self) -> PatternGrid:
+        """创建空白玩家画布：正式游玩必须自己织出纹样。"""
+        return PatternGrid(self.width, self.height)
+
+    def create_solution_grid(self) -> PatternGrid:
+        """创建只读的目标纹样，用于右侧“关卡目标”预览。"""
         return PatternGrid(self.width, self.height, [list(row) for row in self.target])
