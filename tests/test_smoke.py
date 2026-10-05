@@ -85,5 +85,14 @@ class MainWindowSmokeTests(unittest.TestCase):
         self.assertIn("织造完成", window.complete_label.text())
         self.assertIn("★★★", window.complete_label.text())
         window.close()
+
+    def test_compile_shows_compression_combo(self):
+        window = MainWindow()
+
+        window.compile_current_pattern()
+
+        self.assertIn("连击", window.combo_label.text())
+        self.assertIn("花本压缩", window.combo_label.text())
+        window.close()
 if __name__ == "__main__":
     unittest.main()

@@ -18,9 +18,11 @@ from jingwei.application.compile_service import CompileService
 from jingwei.domain.compiler import WeavePlan
 from jingwei.domain.models import PatternGrid
 from jingwei.game.catalog import LEVELS, get_level
+from jingwei.game.feedback import calculate_compile_combo
 from jingwei.game.levels import LevelDefinition
 from jingwei.game.scoring import ScoreEngine, ScoreResult
 from jingwei.ui.pattern_canvas import PatternCanvas
+from jingwei.ui.sound_player import SoundPlayer
 from jingwei.ui.weave_preview import WeavePreview
 
 
@@ -36,6 +38,7 @@ class MainWindow(QMainWindow):
         super().__init__(parent)
         self._compile_service = CompileService()
         self._score_engine = ScoreEngine()
+        self._sound = SoundPlayer()
         self._current_plan: WeavePlan | None = None
         self._last_score: ScoreResult | None = None
         self._free_mode = grid is not None
@@ -91,10 +94,13 @@ class MainWindow(QMainWindow):
         self.score_label.setObjectName("scoreText")
         self.stars_label = QLabel()
         self.stars_label.setObjectName("starsText")
+        self.combo_label = QLabel("")
+        self.combo_label.setObjectName("comboText")
         self.progress_label = QLabel()
         self.progress_label.setObjectName("progressText")
         layout.addWidget(self.level_label)
         layout.addWidget(self.objective_label, stretch=1)
+        layout.addWidget(self.combo_label)
         layout.addWidget(self.progress_label)
         layout.addWidget(self.score_label)
         layout.addWidget(self.stars_label)
@@ -241,6 +247,7 @@ class MainWindow(QMainWindow):
         self._last_score = None
         self.weave_preview.set_plan(None)
         self.complete_label.setText("")
+        self.combo_label.setText("")
         self.progress_label.setText(f"织造 0/{self.canvas.grid.height}")
         self._reset_score_display()
         self.status_label.setText(status)
@@ -276,6 +283,7 @@ class MainWindow(QMainWindow):
         self._last_score = None
         self.weave_preview.set_plan(None)
         self.complete_label.setText("")
+        self.combo_label.setText("")
         self._refresh_hud()
         self._update_report_placeholder("新关卡已载入")
         self.status_label.setText(f"{level.hint} 点击“编译花本”开始。")
@@ -313,9 +321,11 @@ class MainWindow(QMainWindow):
         self.status_label.setText("织造已重置，可以重新播放。")
 
     def _on_pick_advanced(self, completed: int) -> None:
+        self._sound.play_shuttle()
         self.progress_label.setText(f"织造 {completed}/{self.weave_preview.total_picks}")
 
     def _on_weaving_finished(self) -> None:
+        self._sound.play_success()
         if self._last_score is None:
             self.complete_label.setText("织造完成 · 自由创作")
             self.status_label.setText("织造完成。")
@@ -333,6 +343,9 @@ class MainWindow(QMainWindow):
         self._current_plan = plan
         self.weave_preview.set_plan(plan)
         self.complete_label.setText("")
+        combo = calculate_compile_combo(plan)
+        self.combo_label.setText(combo.message)
+        self._sound.play_compile()
         lines = [
             f"画布：{plan.warp_count} 列 × {plan.weft_count} 行",
             f"原始织造行：{plan.report.original_pick_count}",
@@ -376,6 +389,7 @@ class MainWindow(QMainWindow):
             QLabel#levelTitle { color: #FBBF24; font-size: 16pt; font-weight: 800; }
             QLabel#objectiveText, QLabel#hintText, QLabel#statusText { color: #94A3B8; }
             QLabel#scoreText, QLabel#progressText, QLabel#starsText, QLabel#completeText { color: #FDE68A; font-weight: 700; }
+            QLabel#comboText { color: #F472B6; font-weight: 800; }
             QPushButton { background: #1E293B; border: 1px solid #475569; border-radius: 8px; padding: 7px 10px; color: #E2E8F0; }
             QPushButton:hover { background: #334155; }
             QPushButton:checked { background: #243B6B; border-color: #60A5FA; color: #FFFFFF; }
