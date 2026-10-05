@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 from PySide6.QtCore import QRectF, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import QWidget
@@ -26,6 +28,11 @@ class WeavePreview(QWidget):
         self._timer = QTimer(self)
         self._timer.setInterval(260)
         self._timer.timeout.connect(self.advance_one_pick)
+        self._celebration_frames = 0
+        self._celebration_total_frames = 40
+        self._celebration_timer = QTimer(self)
+        self._celebration_timer.setInterval(45)
+        self._celebration_timer.timeout.connect(self.advance_celebration)
         self.setMinimumHeight(230)
 
     @property
@@ -50,8 +57,18 @@ class WeavePreview(QWidget):
     def is_running(self) -> bool:
         return self._running
 
+    @property
+    def celebration_active(self) -> bool:
+        return self._celebration_frames > 0
+
+    @property
+    def celebration_frames_remaining(self) -> int:
+        return self._celebration_frames
+
     def set_plan(self, plan: WeavePlan | None) -> None:
         self._timer.stop()
+        self._celebration_timer.stop()
+        self._celebration_frames = 0
         self._running = False
         self._plan = plan
         self._matrix = build_weave_matrix(plan) if plan and plan.picks else None
@@ -61,7 +78,9 @@ class WeavePreview(QWidget):
 
     def reset(self) -> None:
         self._timer.stop()
+        self._celebration_timer.stop()
         self._running = False
+        self._celebration_frames = 0
         self._completed_picks = 0
         self._finished_emitted = False
         self.update()
@@ -78,7 +97,19 @@ class WeavePreview(QWidget):
             self._finished_emitted = True
             self._timer.stop()
             self._running = False
+            self._celebration_frames = self._celebration_total_frames
+            self._celebration_timer.start()
             self.weavingFinished.emit()
+
+    def advance_celebration(self) -> None:
+        """推进完成粒子动画；纯状态方法便于自动化测试。"""
+        if self._celebration_frames <= 0:
+            self._celebration_timer.stop()
+            return
+        self._celebration_frames -= 1
+        self.update()
+        if self._celebration_frames == 0:
+            self._celebration_timer.stop()
 
     def start_animation(self) -> None:
         if not self.can_start:
@@ -141,6 +172,21 @@ class WeavePreview(QWidget):
         painter.setBrush(QColor("#B64B3E"))
         painter.setPen(Qt.NoPen)
         painter.drawRoundedRect(QRectF(shuttle_x - 24, shuttle_y - 7, 48, 14), 7, 7)
+
+        if self._celebration_frames > 0:
+            progress = 1.0 - self._celebration_frames / self._celebration_total_frames
+            center_x = self.width() / 2
+            center_y = self.height() * 0.42
+            colors = (QColor("#FBBF24"), QColor("#F87171"), QColor("#F8FAFC"))
+            painter.setPen(Qt.NoPen)
+            for index in range(36):
+                angle = index * math.tau / 36
+                distance = 18 + progress * 130
+                x = center_x + math.cos(angle) * distance
+                y = center_y + math.sin(angle) * distance + progress * 55
+                radius = max(1.0, 4.0 * (1.0 - progress))
+                painter.setBrush(colors[index % len(colors)])
+                painter.drawEllipse(QRectF(x - radius, y - radius, radius * 2, radius * 2))
 
         painter.setPen(QColor("#CBD5E1"))
         painter.drawText(

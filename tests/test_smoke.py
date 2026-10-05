@@ -94,5 +94,23 @@ class MainWindowSmokeTests(unittest.TestCase):
         self.assertIn("连击", window.combo_label.text())
         self.assertIn("花本压缩", window.combo_label.text())
         window.close()
+    def test_default_time_label_shows_level_order_time(self):
+        window = MainWindow()
+
+        self.assertIn("01:30", window.time_label.text())
+        window.close()
+
+    def test_challenge_timeout_stops_weaving(self):
+        window = MainWindow()
+        window.compile_current_pattern()
+        window.start_weave_button.click()
+
+        window.tick_challenge(90)
+
+        self.assertIn("00:00", window.time_label.text())
+        self.assertIn("订单超时", window.status_label.text())
+        window.close()
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -18,6 +18,7 @@ from jingwei.application.compile_service import CompileService
 from jingwei.domain.compiler import WeavePlan
 from jingwei.domain.models import PatternGrid
 from jingwei.game.catalog import LEVELS, get_level
+from jingwei.game.challenge import ChallengeClock, ChallengeSnapshot
 from jingwei.game.feedback import calculate_compile_combo
 from jingwei.game.levels import LevelDefinition
 from jingwei.game.scoring import ScoreEngine, ScoreResult
@@ -39,6 +40,10 @@ class MainWindow(QMainWindow):
         self._compile_service = CompileService()
         self._score_engine = ScoreEngine()
         self._sound = SoundPlayer()
+        self._challenge_clock: ChallengeClock | None = None
+        self._challenge_timer = QTimer(self)
+        self._challenge_timer.setInterval(1000)
+        self._challenge_timer.timeout.connect(self._on_challenge_tick)
         self._current_plan: WeavePlan | None = None
         self._last_score: ScoreResult | None = None
         self._free_mode = grid is not None
@@ -94,12 +99,15 @@ class MainWindow(QMainWindow):
         self.score_label.setObjectName("scoreText")
         self.stars_label = QLabel()
         self.stars_label.setObjectName("starsText")
+        self.time_label = QLabel()
+        self.time_label.setObjectName("timeText")
         self.combo_label = QLabel("")
         self.combo_label.setObjectName("comboText")
         self.progress_label = QLabel()
         self.progress_label.setObjectName("progressText")
         layout.addWidget(self.level_label)
         layout.addWidget(self.objective_label, stretch=1)
+        layout.addWidget(self.time_label)
         layout.addWidget(self.combo_label)
         layout.addWidget(self.progress_label)
         layout.addWidget(self.score_label)
@@ -222,6 +230,34 @@ class MainWindow(QMainWindow):
         self.weave_preview.pickAdvanced.connect(self._on_pick_advanced)
         self.weave_preview.weavingFinished.connect(self._on_weaving_finished)
 
+    @staticmethod
+    def _format_time(seconds: float) -> str:
+        total = max(0, int(seconds + 0.999))
+        return f"{total // 60:02d}:{total % 60:02d}"
+
+    def _reset_challenge_clock(self) -> None:
+        self._challenge_timer.stop()
+        if self._level is None:
+            self._challenge_clock = None
+            self.time_label.setText("自由模式")
+            return
+        self._challenge_clock = ChallengeClock(self._level.par_seconds)
+        self.time_label.setText(f"订单 {self._format_time(self._challenge_clock.remaining_seconds)}")
+
+    def tick_challenge(self, seconds: float = 1.0) -> ChallengeSnapshot | None:
+        if self._challenge_clock is None:
+            return None
+        snapshot = self._challenge_clock.tick(seconds)
+        self.time_label.setText(f"订单 {self._format_time(snapshot.remaining_seconds)}")
+        if snapshot.expired:
+            self._challenge_timer.stop()
+            self.weave_preview.stop_animation()
+            self.status_label.setText("订单超时：点击“重织”后再试")
+        return snapshot
+
+    def _on_challenge_tick(self) -> None:
+        self.tick_challenge(1.0)
+
     def _activate_paint_mode(self) -> None:
         self.paint_button.setChecked(True)
         self.erase_button.setChecked(False)
@@ -248,6 +284,7 @@ class MainWindow(QMainWindow):
         self.weave_preview.set_plan(None)
         self.complete_label.setText("")
         self.combo_label.setText("")
+        self._reset_challenge_clock()
         self.progress_label.setText(f"织造 0/{self.canvas.grid.height}")
         self._reset_score_display()
         self.status_label.setText(status)
@@ -269,6 +306,7 @@ class MainWindow(QMainWindow):
             self.objective_label.setText(self._level.description)
         self.progress_label.setText(f"织造 0/{self.canvas.grid.height}")
         self._reset_score_display()
+        self._reset_challenge_clock()
 
     def load_level(self, index: int) -> LevelDefinition:
         level = get_level(index)
@@ -304,8 +342,12 @@ class MainWindow(QMainWindow):
         if self._current_plan is None or not self._current_plan.picks:
             self.status_label.setText("织造失败：请先绘制并编译有效纹样。")
             return
+        if self._level is not None and (self._challenge_clock is None or self._challenge_clock.expired):
+            self._reset_challenge_clock()
+        if self._level is not None:
+            self._challenge_timer.start()
         self.weave_preview.start_animation()
-        self.status_label.setText("织造中：观察经线提升、梭子穿行和织物生长。")
+        self.status_label.setText("织造中：赶在订单超时前完成作品。")
 
     def _step_weaving(self) -> None:
         if self._current_plan is None:
@@ -316,6 +358,7 @@ class MainWindow(QMainWindow):
         self.weave_preview.advance_one_pick()
 
     def _reset_weaving(self) -> None:
+        self._reset_challenge_clock()
         self.weave_preview.reset()
         self.progress_label.setText(f"织造 0/{self.weave_preview.total_picks}")
         self.status_label.setText("织造已重置，可以重新播放。")
@@ -325,6 +368,7 @@ class MainWindow(QMainWindow):
         self.progress_label.setText(f"织造 {completed}/{self.weave_preview.total_picks}")
 
     def _on_weaving_finished(self) -> None:
+        self._challenge_timer.stop()
         self._sound.play_success()
         if self._last_score is None:
             self.complete_label.setText("织造完成 · 自由创作")
@@ -390,6 +434,7 @@ class MainWindow(QMainWindow):
             QLabel#objectiveText, QLabel#hintText, QLabel#statusText { color: #94A3B8; }
             QLabel#scoreText, QLabel#progressText, QLabel#starsText, QLabel#completeText { color: #FDE68A; font-weight: 700; }
             QLabel#comboText { color: #F472B6; font-weight: 800; }
+            QLabel#timeText { color: #93C5FD; font-weight: 800; }
             QPushButton { background: #1E293B; border: 1px solid #475569; border-radius: 8px; padding: 7px 10px; color: #E2E8F0; }
             QPushButton:hover { background: #334155; }
             QPushButton:checked { background: #243B6B; border-color: #60A5FA; color: #FFFFFF; }

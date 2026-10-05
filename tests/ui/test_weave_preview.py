@@ -66,5 +66,28 @@ class WeavePreviewTests(unittest.TestCase):
         self.assertFalse(self.preview.is_running)
 
 
+    def test_finish_starts_celebration_and_can_advance_to_end(self):
+        self.preview.set_plan(self.plan)
+        for _ in range(self.preview.total_picks):
+            self.preview.advance_one_pick()
+
+        self.assertTrue(self.preview.celebration_active)
+        self.assertGreater(self.preview.celebration_frames_remaining, 0)
+
+        while self.preview.celebration_active:
+            self.preview.advance_celebration()
+
+        self.assertFalse(self.preview.celebration_active)
+
+    def test_reset_stops_celebration(self):
+        self.preview.set_plan(self.plan)
+        for _ in range(self.preview.total_picks):
+            self.preview.advance_one_pick()
+
+        self.preview.reset()
+
+        self.assertFalse(self.preview.celebration_active)
+
+
 if __name__ == "__main__":
     unittest.main()
