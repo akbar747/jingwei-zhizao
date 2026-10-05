@@ -58,8 +58,7 @@ jobs:
         with:
           name: release-build-diagnostics
           path: |
-            ${{ github.workspace }}/build/*.log
-            ${{ github.workspace }}/build/**/warn-*.txt
+            ${{ github.workspace }}/pyinstaller-diagnostic.log
           retention-days: 1
           if-no-files-found: warn
           include-hidden-files: true

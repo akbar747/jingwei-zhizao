@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "0.2.7",
+    [string]$Version = "0.2.8",
     [switch]$SkipInstaller
 )
 
@@ -52,7 +52,11 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 New-Item -ItemType Directory -Force -Path (Join-Path $Root "build\spec"), (Join-Path $Root "build\pyinstaller") | Out-Null
-$pyInstallerLog = Join-Path $Root "build\pyinstaller-build.log"
+if ($env:GITHUB_WORKSPACE) {
+    $pyInstallerLog = Join-Path $env:GITHUB_WORKSPACE "pyinstaller-diagnostic.log"
+} else {
+    $pyInstallerLog = Join-Path $Root "build\pyinstaller-build.log"
+}
 $previousErrorPreference = $ErrorActionPreference
 $ErrorActionPreference = "Continue"
 $pyInstallerOutput = & $python -m PyInstaller `
