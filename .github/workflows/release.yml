@@ -58,8 +58,8 @@ jobs:
         with:
           name: release-build-diagnostics
           path: |
-            build/**/*.log
-            build/**/*.txt
+            build/*.log
+            build/**/warn-*.txt
           if-no-files-found: warn
           include-hidden-files: true
 
