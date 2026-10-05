@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QWidget
 
 from jingwei.domain.models import PatternGrid
 from jingwei.ui.canvas_geometry import cell_from_point, cell_rect
+from jingwei.ui.history import PatternAction, PatternHistory
 
 
 class PatternCanvas(QWidget):
@@ -19,6 +20,8 @@ class PatternCanvas(QWidget):
     """
 
     patternChanged = Signal()
+    canUndoChanged = Signal(bool)
+    canRedoChanged = Signal(bool)
 
     def __init__(self, grid: PatternGrid, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -27,6 +30,8 @@ class PatternCanvas(QWidget):
         self._read_only = False
         self._is_painting = False
         self._paint_value = True
+        self.history = PatternHistory()
+        self._pending_changes: list[tuple[int, int, bool, bool]] = []
         self.setMinimumSize(320, 320)
         self.setMouseTracking(False)
         self.setAutoFillBackground(False)
@@ -37,11 +42,15 @@ class PatternCanvas(QWidget):
         return self._grid
 
     def set_grid(self, grid: PatternGrid) -> None:
-        """替换画布模型并立即重绘。"""
+        """替换画布模型并立即重绘，同时重置历史。"""
         if not isinstance(grid, PatternGrid):
             raise TypeError("PatternCanvas 只接受 PatternGrid")
         self._grid = grid
         self._is_painting = False
+        self._pending_changes.clear()
+        self.history.clear()
+        self.canUndoChanged.emit(False)
+        self.canRedoChanged.emit(False)
         self.update()
 
     def set_erase_mode(self, enabled: bool) -> None:
@@ -62,7 +71,7 @@ class PatternCanvas(QWidget):
         return None
 
     def _paint_at(self, x: float, y: float) -> None:
-        """把当前位置对应的单元设置为当前绘制值。"""
+        """把当前位置对应的单元设置为当前绘制值，并记录这次修改。"""
         cell = cell_from_point(
             x,
             y,
@@ -75,12 +84,51 @@ class PatternCanvas(QWidget):
             return
 
         column, row = cell
-        if self._grid.get(column, row) == self._paint_value:
+        previous = self._grid.get(column, row)
+        if previous == self._paint_value:
             return
 
         self._grid.set(column, row, self._paint_value)
+        self._pending_changes.append((column, row, previous, self._paint_value))
         self.update()
         self.patternChanged.emit()
+
+    def _commit_stroke(self) -> None:
+        """一次拖动结束时，把整笔修改合并为一个可撤销操作。"""
+        if not self._pending_changes:
+            return
+        self.history.push(PatternAction(changes=tuple(self._pending_changes)))
+        self._pending_changes.clear()
+        self.canUndoChanged.emit(self.history.can_undo)
+        self.canRedoChanged.emit(self.history.can_redo)
+
+    def undo(self) -> bool:
+        """撤销上一笔修改。"""
+        if not self.history.can_undo:
+            return False
+        self.history.undo(self._grid)
+        self.update()
+        self.patternChanged.emit()
+        self.canUndoChanged.emit(self.history.can_undo)
+        self.canRedoChanged.emit(self.history.can_redo)
+        return True
+
+    def redo(self) -> bool:
+        """重做被撤销的一笔修改。"""
+        if not self.history.can_redo:
+            return False
+        self.history.redo(self._grid)
+        self.update()
+        self.patternChanged.emit()
+        self.canUndoChanged.emit(self.history.can_undo)
+        self.canRedoChanged.emit(self.history.can_redo)
+        return True
+
+    def clear_history(self) -> None:
+        self.history.clear()
+        self._pending_changes.clear()
+        self.canUndoChanged.emit(False)
+        self.canRedoChanged.emit(False)
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         """开始一次鼠标绘制操作。"""
@@ -109,7 +157,9 @@ class PatternCanvas(QWidget):
         event.accept()
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        """结束鼠标绘制操作。"""
+        """结束鼠标绘制操作，并把整笔修改写入历史。"""
+        if self._is_painting:
+            self._commit_stroke()
         self._is_painting = False
         event.accept()
 

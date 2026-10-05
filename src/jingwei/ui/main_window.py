@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QFileDialog,
     QFrame,
@@ -29,7 +30,9 @@ from jingwei.game.levels import LevelDefinition
 from jingwei.game.orders import OrderModifier, OrderSettings, apply_modifier, choose_modifier
 from jingwei.game.progress import ProgressStore
 from jingwei.game.stars import StarEngine, StarResult
+from jingwei.game.finale import build_result_summary
 from jingwei.ui.album_dialog import WeavingAlbumDialog
+from jingwei.ui.celebration_overlay import CelebrationOverlay
 from jingwei.ui.pattern_canvas import PatternCanvas
 from jingwei.ui.sound_player import SoundPlayer
 from jingwei.ui.weave_preview import WeavePreview
@@ -118,6 +121,12 @@ class MainWindow(QMainWindow):
         root_layout.addWidget(self._build_weave_panel())
         self.setCentralWidget(root)
 
+        self.celebration = CelebrationOverlay(self)
+        self.celebration.exportRequested.connect(self.export_current_artifact)
+        self.celebration.replayRequested.connect(self._replay_from_celebration)
+        self.celebration.nextLevelRequested.connect(self._next_level)
+        self.celebration.dismissed.connect(lambda: None)
+
     def _build_hud(self) -> QWidget:
         hud = QFrame()
         hud.setObjectName("hudPanel")
@@ -175,6 +184,16 @@ class MainWindow(QMainWindow):
         for button in (self.paint_button, self.erase_button, self.clear_button, self.compile_button):
             button.setMinimumHeight(36)
             layout.addWidget(button)
+
+        history_row = QHBoxLayout()
+        history_row.setSpacing(6)
+        self.undo_button = QPushButton("撤销")
+        self.redo_button = QPushButton("重做")
+        self.undo_button.setEnabled(False)
+        self.redo_button.setEnabled(False)
+        history_row.addWidget(self.undo_button)
+        history_row.addWidget(self.redo_button)
+        layout.addLayout(history_row)
 
         layout.addSpacing(6)
         level_title = QLabel("织造关卡")
@@ -299,6 +318,12 @@ class MainWindow(QMainWindow):
         self.album_button.clicked.connect(self.show_album)
         self.export_button.clicked.connect(self.export_current_artifact)
         self.canvas.patternChanged.connect(self._on_pattern_changed)
+        self.undo_button.clicked.connect(self.canvas.undo)
+        self.redo_button.clicked.connect(self.canvas.redo)
+        self.canvas.canUndoChanged.connect(self.undo_button.setEnabled)
+        self.canvas.canRedoChanged.connect(self.redo_button.setEnabled)
+        QShortcut(QKeySequence.StandardKey.Undo, self.canvas, activated=self.canvas.undo)
+        QShortcut(QKeySequence.StandardKey.Redo, self.canvas, activated=self.canvas.redo)
         self.weave_preview.pickAdvanced.connect(self._on_pick_advanced)
         self.weave_preview.weavingFinished.connect(self._on_weaving_finished)
 
@@ -371,6 +396,7 @@ class MainWindow(QMainWindow):
 
     def _clear_pattern(self) -> None:
         self.canvas.grid.clear()
+        self.canvas.clear_history()
         self.canvas.update()
         self._invalidate_plan("纹样已清空：请重新绘制并编译")
         self._update_report_placeholder("纹样已清空")
@@ -500,8 +526,22 @@ class MainWindow(QMainWindow):
             self.status_label.setText("织造完成。")
             return
 
+        summary = self.finish_result()
+        if summary is not None and self._current_plan is not None:
+            self.celebration.resize(self.size())
+            self.celebration.show_result(summary, self._current_plan)
+
+    def finish_result(self):
+        """结算一次通关：写入进度、刷新星级并返回展示摘要。"""
+
+        if self._level is None or self._last_star_result is None:
+            return None
         result = self._last_star_result
-        elapsed = self._challenge_clock.duration_seconds - self._challenge_clock.remaining_seconds if self._challenge_clock else 0.0
+        elapsed = (
+            self._challenge_clock.duration_seconds - self._challenge_clock.remaining_seconds
+            if self._challenge_clock
+            else 0.0
+        )
         if not self._finished_recorded:
             self._finished_recorded = True
             self._progress.record(
@@ -525,6 +565,7 @@ class MainWindow(QMainWindow):
             f"织造完成！匹配率 {result.match_ratio:.0%}，"
             f"花本压缩 {result.compression_ratio:.0%}，本关最佳星级已保存。"
         )
+        return build_result_summary(self._level.name, result)
 
     def compile_current_pattern(self) -> WeavePlan:
         plan = self._compile_service.compile(self.canvas.grid)
@@ -603,6 +644,20 @@ class MainWindow(QMainWindow):
             f"状态：{reason}\n目标：{objective}\n\n"
             "编译后显示三星评级：形（匹配度）、技（花本压缩）、速（订单时限）。"
         )
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        if hasattr(self, "celebration"):
+            self.celebration.resize(self.size())
+            card = self.celebration.card
+            self.celebration.card.move(
+                max(0, (self.width() - card.width()) // 2),
+                max(0, (self.height() - card.height()) // 2),
+            )
+
+    def _replay_from_celebration(self) -> None:
+        self.celebration.dismiss()
+        self._reset_weaving()
 
     # ---------- 收藏与导出 ----------
 

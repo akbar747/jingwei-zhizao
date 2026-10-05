@@ -114,6 +114,42 @@ class MainWindowSmokeTests(unittest.TestCase):
         self.assertIn("★★★", window.complete_label.text())
         window.close()
 
+    def test_undo_redo_buttons_follow_history(self):
+        window = self._window()
+        self.assertFalse(window.undo_button.isEnabled())
+
+        window.canvas.grid.set(0, 0, True)
+        window.canvas.patternChanged.emit()
+        from jingwei.ui.history import PatternAction
+
+        window.canvas.history.push(PatternAction.from_change(0, 0, False, True))
+        window.canvas.canUndoChanged.emit(True)
+
+        self.assertTrue(window.undo_button.isEnabled())
+
+        window.undo_button.click()
+
+        self.assertFalse(window.canvas.grid.get(0, 0))
+        self.assertTrue(window.redo_button.isEnabled())
+
+        window.redo_button.click()
+
+        self.assertTrue(window.canvas.grid.get(0, 0))
+        window.close()
+
+    def test_weaving_finish_opens_celebration_overlay(self):
+        window = self._window()
+        fill_grid(window.canvas.grid, LEVELS[0].target)
+        window.compile_current_pattern()
+        for _ in range(window.weave_preview.total_picks):
+            window.weave_preview.advance_one_pick()
+
+        self.assertTrue(window.celebration.active)
+        self.assertEqual(window.celebration.summary.stars, 3)
+        window.celebration.dismiss()
+        self.assertFalse(window.celebration.active)
+        window.close()
+
     def test_compile_shows_compression_combo(self):
         window = self._window()
         fill_grid(window.canvas.grid, LEVELS[0].target)
