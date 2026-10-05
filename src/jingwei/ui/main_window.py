@@ -31,6 +31,7 @@ from jingwei.game.orders import OrderModifier, OrderSettings, apply_modifier, ch
 from jingwei.game.progress import ProgressStore
 from jingwei.game.stars import StarEngine, StarResult
 from jingwei.game.finale import build_result_summary
+from jingwei.game.generator import generate_pattern
 from jingwei.ui.album_dialog import WeavingAlbumDialog
 from jingwei.ui.celebration_overlay import CelebrationOverlay
 from jingwei.ui.operations import SymmetryMode, apply_symmetry, describe_symmetry
@@ -239,6 +240,10 @@ class MainWindow(QMainWindow):
         self.album_button.setObjectName("goldButton")
         self.album_button.setMinimumHeight(38)
         layout.addWidget(self.album_button)
+        self.inspiration_button = QPushButton("灵感纹样")
+        self.inspiration_button.setToolTip("按随机种子生成一件程序化传统纹样")
+        self.inspiration_button.setMinimumHeight(34)
+        layout.addWidget(self.inspiration_button)
         self.export_button = QPushButton("导出当前作品卡")
         self.export_button.setMinimumHeight(36)
         layout.addWidget(self.export_button)
@@ -334,6 +339,7 @@ class MainWindow(QMainWindow):
         self.reset_weave_button.clicked.connect(self._reset_weaving)
         self.next_level_button.clicked.connect(self._next_level)
         self.album_button.clicked.connect(self.show_album)
+        self.inspiration_button.clicked.connect(self.generate_inspiration)
         self.export_button.clicked.connect(self.export_current_artifact)
         self.canvas.patternChanged.connect(self._on_pattern_changed)
         self.undo_button.clicked.connect(self.canvas.undo)
@@ -418,6 +424,28 @@ class MainWindow(QMainWindow):
         self.canvas.update()
         self._invalidate_plan("纹样已清空：请重新绘制并编译")
         self._update_report_placeholder("纹样已清空")
+
+    def generate_inspiration(self) -> None:
+        """在当前画布尺寸上生成一件可复现的程序化纹样。"""
+
+        import random
+
+        seed = random.randrange(1, 1_000_000)
+        generated = generate_pattern(
+            seed=seed,
+            size=min(self.canvas.grid.width, self.canvas.grid.height),
+        )
+        self.canvas.grid.clear()
+        for row, row_values in enumerate(generated.cells):
+            for column, value in enumerate(row_values):
+                if column < self.canvas.grid.width and row < self.canvas.grid.height:
+                    self.canvas.grid.set(column, row, value)
+        self.canvas.clear_history()
+        self.canvas.update()
+        self.canvas.patternChanged.emit()
+        self.status_label.setText(
+            f"灵感纹样：{generated.style_label}（种子 {generated.seed}）"
+        )
 
     def apply_alchemy(self, mode: SymmetryMode) -> None:
         """一键把当前纹样炼成传统对称构图，可整体撤销。"""

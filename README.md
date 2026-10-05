@@ -10,7 +10,7 @@
 参赛方向：第十四届全国大学生数字媒体科技作品及创意竞赛  
 赛道定位：指定命题类——民族文化创新表达  
 作品形态：Windows离线桌面软件  
-当前状态：织造工坊 Game Loop 已完成，含三星评级、纹样收藏册、进度存档、订单变体、纹样炼成、撤销重做、通关庆典与作品卡导出
+当前状态：织造工坊 Game Loop 已完成，含三星评级、纹样收藏册、进度存档、订单变体、纹样炼成、程序化灵感纹样、撤销重做、通关庆典与作品卡导出
 
 ![织造工坊连击、三星评价与订单](docs/screenshots/game-upgrade-album.png)
 
@@ -33,6 +33,14 @@
 ![纹样炼成与对称工具](docs/screenshots/game-upgrade-alchemy.png)
 
 ![通关庆典结算](docs/screenshots/game-upgrade-finale.png)
+
+### 程序化灵感纹样（离线、可复现）
+
+- 「灵感纹样」按钮用确定性随机种子生成四种传统风格纹样：**天圆回纹、菱格锦、云雷纹、团花纹**。
+- 同一种子永远生成同一件纹样，因此可复现、可出题，也方便教学演示。
+- 生成器完全离线、纯 Python，是自由创作与课堂命题的内容引擎。
+
+![程序化生成的四种纹样风格](docs/screenshots/game-upgrade-patterns.png)
 
 ### 三星评级：同一件作品，三重目标
 
@@ -152,6 +160,7 @@
 | 纹样炼成对称工具 | 已完成 | Symmetry 变换与撤销测试 |
 | 整笔撤销/重做 | 已完成 | PatternHistory 单元测试与冒烟测试 |
 | 通关庆典结算层 | 已完成 | Finale 摘要与覆盖层测试 |
+| 程序化纹样生成 | 已完成 | Generator 确定性与风格测试 |
 | 精细3D花楼和布料物理 | 计划中 | 尚未实现 |
 | CSV、WIF导出 | 计划中 | 尚未实现 |
 | Windows免安装程序 | 计划中 | 尚未实现 |
@@ -167,6 +176,7 @@
 - 纹样收藏册、关卡解锁与 JSON 进度存档。
 - 纹样炼成：一键左右/上下/四向/对角对称，可整体撤销。
 - 整笔撤销/重做（撤销、重做按钮与 Ctrl+Z/Ctrl+Y）。
+- 程序化灵感纹样：四种传统风格、同种子可复现。
 - 通关庆典结算层与织锦作品卡 PNG 导出。
 - Qt离屏冒烟测试，可在无人点击环境验证主流程。
 - Windows CI自动测试配置。
@@ -205,6 +215,7 @@
   Album（纹样收藏册）
   ArtifactCard（作品卡渲染）
   ResultSummary（通关结算摘要）
+  PatternGenerator（程序化纹样）
 
 编辑层 ui
   PatternHistory（撤销/重做）
@@ -264,7 +275,7 @@ $env:PYTHONPATH='src'
 当前验证结果：
 
 ```text
-Ran 118 tests
+Ran 126 tests
 OK
 Smoke test exit code: 0
 ```

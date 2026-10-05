@@ -115,6 +115,15 @@ class MainWindowSmokeTests(unittest.TestCase):
         self.assertIn("★★★", window.complete_label.text())
         window.close()
 
+    def test_inspiration_fills_canvas_with_a_pattern(self):
+        window = self._window()
+
+        window.generate_inspiration()
+
+        self.assertFalse(window.canvas.grid.is_empty())
+        self.assertIn("灵感纹样", window.status_label.text())
+        window.close()
+
     def test_alchemy_expands_and_is_undoable(self):
         window = self._window()
         window.canvas.grid.set(0, 0, True)
