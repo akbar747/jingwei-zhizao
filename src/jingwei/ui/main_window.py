@@ -192,9 +192,13 @@ class MainWindow(QMainWindow):
         self.start_weave_button.setObjectName("primaryButton")
         self.step_weave_button = QPushButton("下一梭")
         self.reset_weave_button = QPushButton("重织")
+        self.complete_label = QLabel("")
+        self.complete_label.setObjectName("completeText")
+        self.complete_label.setWordWrap(True)
         controls.addWidget(self.start_weave_button)
         controls.addWidget(self.step_weave_button)
         controls.addWidget(self.reset_weave_button)
+        controls.addWidget(self.complete_label)
         controls.addStretch(1)
         layout.addLayout(controls)
         return panel
@@ -236,6 +240,7 @@ class MainWindow(QMainWindow):
         self._current_plan = None
         self._last_score = None
         self.weave_preview.set_plan(None)
+        self.complete_label.setText("")
         self.progress_label.setText(f"织造 0/{self.canvas.grid.height}")
         self._reset_score_display()
         self.status_label.setText(status)
@@ -270,6 +275,7 @@ class MainWindow(QMainWindow):
         self._current_plan = None
         self._last_score = None
         self.weave_preview.set_plan(None)
+        self.complete_label.setText("")
         self._refresh_hud()
         self._update_report_placeholder("新关卡已载入")
         self.status_label.setText(f"{level.hint} 点击“编译花本”开始。")
@@ -311,8 +317,13 @@ class MainWindow(QMainWindow):
 
     def _on_weaving_finished(self) -> None:
         if self._last_score is None:
+            self.complete_label.setText("织造完成 · 自由创作")
             self.status_label.setText("织造完成。")
         else:
+            stars = "★" * self._last_score.stars + "☆" * (3 - self._last_score.stars)
+            self.complete_label.setText(
+                f"织造完成 · {stars} · {self._last_score.score:.1f}分"
+            )
             self.status_label.setText(
                 f"织造完成！匹配率 {self._last_score.match_ratio:.0%}，得分 {self._last_score.score:.1f}。"
             )
@@ -321,6 +332,7 @@ class MainWindow(QMainWindow):
         plan = self._compile_service.compile(self.canvas.grid)
         self._current_plan = plan
         self.weave_preview.set_plan(plan)
+        self.complete_label.setText("")
         lines = [
             f"画布：{plan.warp_count} 列 × {plan.weft_count} 行",
             f"原始织造行：{plan.report.original_pick_count}",
@@ -363,7 +375,7 @@ class MainWindow(QMainWindow):
             QLabel#panelTitle { color: #F8FAFC; font-size: 13pt; font-weight: 700; padding-bottom: 4px; }
             QLabel#levelTitle { color: #FBBF24; font-size: 16pt; font-weight: 800; }
             QLabel#objectiveText, QLabel#hintText, QLabel#statusText { color: #94A3B8; }
-            QLabel#scoreText, QLabel#progressText, QLabel#starsText { color: #FDE68A; font-weight: 700; }
+            QLabel#scoreText, QLabel#progressText, QLabel#starsText, QLabel#completeText { color: #FDE68A; font-weight: 700; }
             QPushButton { background: #1E293B; border: 1px solid #475569; border-radius: 8px; padding: 7px 10px; color: #E2E8F0; }
             QPushButton:hover { background: #334155; }
             QPushButton:checked { background: #243B6B; border-color: #60A5FA; color: #FFFFFF; }

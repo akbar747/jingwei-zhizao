@@ -75,5 +75,15 @@ class MainWindowSmokeTests(unittest.TestCase):
         window.close()
 
 
+
+    def test_weaving_finish_shows_result_banner(self):
+        window = MainWindow()
+        window.compile_current_pattern()
+        for _ in range(window.weave_preview.total_picks):
+            window.weave_preview.advance_one_pick()
+
+        self.assertIn("织造完成", window.complete_label.text())
+        self.assertIn("★★★", window.complete_label.text())
+        window.close()
 if __name__ == "__main__":
     unittest.main()
